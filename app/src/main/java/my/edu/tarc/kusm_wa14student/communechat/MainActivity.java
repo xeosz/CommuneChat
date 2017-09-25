@@ -1,20 +1,32 @@
 package my.edu.tarc.kusm_wa14student.communechat;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.design.internal.BottomNavigationItemView;
 import android.support.design.internal.BottomNavigationMenuView;
 import android.support.design.widget.BottomNavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.TextView;
+
+import org.eclipse.paho.client.mqttv3.*;
+import org.w3c.dom.Text;
 
 import java.lang.reflect.Field;
 
+import my.edu.tarc.kusm_wa14student.communechat.assets.MqttHelper;
+import my.edu.tarc.kusm_wa14student.communechat.assets.ViewPagerAdapter;
+import my.edu.tarc.kusm_wa14student.communechat.fragments.ChatFragment;
+import my.edu.tarc.kusm_wa14student.communechat.fragments.ContactFragment;
+import my.edu.tarc.kusm_wa14student.communechat.fragments.SearchFragment;
+import my.edu.tarc.kusm_wa14student.communechat.fragments.UserFragment;
+
 public class MainActivity extends AppCompatActivity {
+    private MqttHelper mqttHelper;
+
     private ViewPager viewPager;
     private BottomNavigationView bottomNavView;
 
@@ -24,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private ChatFragment chatFragment;
 
     private MenuItem prevMenuItem;
-
+    private SelectedBundle selectedBundle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,8 +104,37 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         */
-
         setupViewPager(viewPager);
+
+
+        startMqtt();
+    }
+    private void startMqtt() {
+        mqttHelper = new MqttHelper(getApplicationContext());
+        mqttHelper.setCallback(new MqttCallbackExtended() {
+            @Override
+            public void connectComplete(boolean b, String s) {
+
+            }
+
+            @Override
+            public void connectionLost(Throwable throwable) {
+
+            }
+
+            @Override
+            public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
+                Log.w("Debug",mqttMessage.toString());
+                Bundle bundle = new Bundle();
+                bundle.putString("message",mqttMessage.toString());
+                selectedBundle.onBundleSelect(bundle);
+            }
+
+            @Override
+            public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
+
+            }
+        });
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -130,5 +171,15 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("ERROR ILLEGAL ALG", "Unable to change value of shift mode");
             }
         }
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        //selectedBundle.onBundleSelect(bundle);
+    }
+    public void setOnBundleSelected(SelectedBundle selectedBundle) {
+        this.selectedBundle = selectedBundle;
+    }
+    public interface SelectedBundle {
+        void onBundleSelect(Bundle bundle);
     }
 }
