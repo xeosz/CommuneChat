@@ -1,4 +1,4 @@
-package my.edu.tarc.kusm_wa14student.communechat;
+package my.edu.tarc.kusm_wa14student.communechat.assets;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
