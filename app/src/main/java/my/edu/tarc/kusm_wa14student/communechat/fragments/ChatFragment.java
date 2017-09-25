@@ -55,7 +55,8 @@ public class ChatFragment extends Fragment {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final MqttAndroidClient client = new MqttAndroidClient(getActivity().getApplicationContext(), "tcp://m11.cloudmqtt.com:17391", "xeosz");
+                final MqttAndroidClient client = new MqttAndroidClient(getActivity().getApplicationContext(),
+                        "tcp://m11.cloudmqtt.com:17391", "xeosz");
                 MqttConnectOptions options = new MqttConnectOptions();
                 try {
                     options.setUserName("ehvfrtgx");
@@ -73,6 +74,7 @@ public class ChatFragment extends Fragment {
                             message.setQos(0);
                             message.setRetained(false);
 
+                            //mqtt topic
                             String topic = "sensor/test";
 
                             try {
@@ -81,10 +83,6 @@ public class ChatFragment extends Fragment {
 
                                 // client.disconnect();
                                 //Log.i("mqtt", "client disconnected");
-
-                            } catch (MqttPersistenceException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
 
                             } catch (MqttException e) {
                                 // TODO Auto-generated catch block
