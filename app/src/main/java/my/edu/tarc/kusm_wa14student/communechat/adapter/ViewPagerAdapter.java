@@ -1,8 +1,10 @@
-package my.edu.tarc.kusm_wa14student.communechat.assets;
+package my.edu.tarc.kusm_wa14student.communechat.adapter;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,4 +33,9 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
         mFragmentList.add(fragment);
     }
 
+    @Override
+    public void destroyItem(ViewGroup container, int position, Object object) {
+        //super.destroyItem(container, position, object);
+        //NOTE: This prevents the activity from killing the fragments in the backstack.
+    }
 }

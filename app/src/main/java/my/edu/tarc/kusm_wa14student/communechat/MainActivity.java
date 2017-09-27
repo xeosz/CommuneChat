@@ -10,21 +10,26 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
-import android.widget.TextView;
 
 import org.eclipse.paho.client.mqttv3.*;
-import org.w3c.dom.Text;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 
-import my.edu.tarc.kusm_wa14student.communechat.assets.MqttHelper;
-import my.edu.tarc.kusm_wa14student.communechat.assets.ViewPagerAdapter;
+import my.edu.tarc.kusm_wa14student.communechat.components.MqttHelper;
+import my.edu.tarc.kusm_wa14student.communechat.adapter.ViewPagerAdapter;
 import my.edu.tarc.kusm_wa14student.communechat.fragments.ChatFragment;
 import my.edu.tarc.kusm_wa14student.communechat.fragments.ContactFragment;
 import my.edu.tarc.kusm_wa14student.communechat.fragments.SearchFragment;
 import my.edu.tarc.kusm_wa14student.communechat.fragments.UserFragment;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String TAG = "MainActivity";
+
+    private final MainActivity mainActivity = this;
+
+    private ArrayList<String> connectionMap;
+
     private MqttHelper mqttHelper;
 
     private ViewPager viewPager;
@@ -38,6 +43,15 @@ public class MainActivity extends AppCompatActivity {
     private MenuItem prevMenuItem;
     private SelectedBundle selectedBundle;
 
+    private String clientId = "10000001";
+    private String serverUri = "tcp://m11.cloudmqtt.com:17391";
+    private String mqttUsername = "ehvfrtgx";
+    private String mqttPassword = "YPcMC08pYYpr";
+    private String clientTopic = "";
+    private int QoS = 1;
+    private ViewPagerAdapter adapter;
+    private int NUMBER_OF_SCREENS = 4;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         bottomNavView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
         BottomNavigationViewHelper.removeShiftMode(bottomNavView);
-
+        //viewPager.setOffscreenPageLimit(NUMBER_OF_SCREENS);
         bottomNavView.setOnNavigationItemSelectedListener(
                 new BottomNavigationView.OnNavigationItemSelectedListener() {
                     @Override
@@ -93,7 +107,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-
        /*  //Disable ViewPager Swipe
        viewPager.setOnTouchListener(new View.OnTouchListener()
         {
@@ -105,40 +118,31 @@ public class MainActivity extends AppCompatActivity {
         });
         */
         setupViewPager(viewPager);
-
-
         startMqtt();
     }
+    public void setCallback(MqttCallbackExtended callback){
+        this.mqttHelper.setCallback(callback);
+    }
+    public void mqttSubscribeTopic(String topic){
+        this.mqttHelper.subscribe(topic, QoS);
+    }
+    public void mqttPublishMessage(String topic, String payload){
+        this.mqttHelper.publish(topic, payload, QoS, false);
+    }
+    public void mqttUnsubscribeTopic(String topic){
+        this.mqttHelper.unsubscribe(topic);
+    }
+    public void disconnectMqtt(){
+        this.mqttHelper.disconnect();
+    }
     private void startMqtt() {
-        mqttHelper = new MqttHelper(getApplicationContext());
-        mqttHelper.setCallback(new MqttCallbackExtended() {
-            @Override
-            public void connectComplete(boolean b, String s) {
-
-            }
-
-            @Override
-            public void connectionLost(Throwable throwable) {
-
-            }
-
-            @Override
-            public void messageArrived(String topic, MqttMessage mqttMessage) throws Exception {
-                Log.w("Debug",mqttMessage.toString());
-                Bundle bundle = new Bundle();
-                bundle.putString("message",mqttMessage.toString());
-                selectedBundle.onBundleSelect(bundle);
-            }
-
-            @Override
-            public void deliveryComplete(IMqttDeliveryToken iMqttDeliveryToken) {
-
-            }
-        });
+        mqttHelper = new MqttHelper(getApplicationContext(), serverUri, clientId);
+        mqttHelper.setConnectionOptions(mqttUsername,mqttPassword);
+        mqttHelper.subscribe(clientTopic,QoS);
     }
 
     private void setupViewPager(ViewPager viewPager) {
-        ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
+        adapter = new ViewPagerAdapter(getSupportFragmentManager());
         contactFragment =new ContactFragment();
         chatFragment = new ChatFragment();
         searchFragment= new SearchFragment();
@@ -182,4 +186,10 @@ public class MainActivity extends AppCompatActivity {
     public interface SelectedBundle {
         void onBundleSelect(Bundle bundle);
     }
+
+
+
+
+
+
 }

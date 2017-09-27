@@ -2,12 +2,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="my.edu.tarc.kusm_wa14student.communechat.fragments.ContactFragment">
+    tools:context="my.edu.tarc.kusm_wa14student.communechat.fragments.ContactFragment"
+    android:background="@android:color/white">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
+        android:id="@+id/tv_contact_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:gravity="center"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="?android:listPreferredItemHeightSmall"
+        android:visibility="invisible"/>
+
+    <ListView
+        android:id="@+id/listView_contact"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </FrameLayout>

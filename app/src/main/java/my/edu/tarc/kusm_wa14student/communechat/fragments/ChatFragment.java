@@ -1,109 +1,102 @@
 package my.edu.tarc.kusm_wa14student.communechat.fragments;
 
+import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
+import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttCallback;
+import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import org.eclipse.paho.client.mqttv3.MqttPersistenceException;
-import org.eclipse.paho.client.mqttv3.MqttToken;
+
+import java.util.ArrayList;
+import java.util.Map;
 
 import my.edu.tarc.kusm_wa14student.communechat.MainActivity;
 import my.edu.tarc.kusm_wa14student.communechat.R;
-import my.edu.tarc.kusm_wa14student.communechat.assets.MqttHelper;
 
 public class ChatFragment extends Fragment {
-    TextView textView;
-    EditText editText;
-    Button btn;
-    MqttHelper mqttHelper;
-    MqttAndroidClient mqttAndroidClient;
+    private ListView chatListView;
+    private EditText editText;
+    private Button btn;
+    private ArrayList<String> list;
+    private CustomAdapter adapter;
+    private Bundle savedState = null;
 
     public ChatFragment() {
         // Required empty public constructor
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if(savedInstanceState != null && savedState == null) {
+            savedState = savedInstanceState.getBundle("list");
+        }
+        if(savedState != null) {
+            list = new ArrayList<>();
+            list.addAll(savedState.getStringArrayList("list"));
+        }
+        savedState = null;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_chat, container, false);
-        textView = (TextView)rootView.findViewById(R.id.chatfrag_tv);
+        chatListView = (ListView) rootView.findViewById(R.id.listView_chat);
         editText = (EditText) rootView.findViewById(R.id.editTextChat);
         btn = (Button) rootView.findViewById(R.id.button);
 
+        list = new ArrayList<String>();
+        list.add("test");
+        adapter = new CustomAdapter(list,0,getActivity());
+        chatListView.setAdapter(adapter);
 
-
-        ((MainActivity)getActivity()).setOnBundleSelected(new MainActivity.SelectedBundle() {
+        ((MainActivity)getActivity()).setCallback(new MqttCallbackExtended() {
             @Override
-            public void onBundleSelect(Bundle bundle) {
-                updateList(bundle);
+            public void connectComplete(boolean reconnect, String serverURI) {
+
             }
 
+            @Override
+            public void connectionLost(Throwable cause) {
+
+            }
+
+            @Override
+            public void messageArrived(String topic, MqttMessage message) throws Exception {
+                list.add(message.toString());
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void deliveryComplete(IMqttDeliveryToken token) {
+
+            }
         });
 
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                final MqttAndroidClient client = new MqttAndroidClient(getActivity().getApplicationContext(),
-                        "tcp://m11.cloudmqtt.com:17391", "xeosz");
-                MqttConnectOptions options = new MqttConnectOptions();
-                try {
-                    options.setUserName("ehvfrtgx");
-                    options.setPassword("YPcMC08pYYpr".toCharArray());
-                    IMqttToken token = client.connect(options);
-
-                    token.setActionCallback(new IMqttActionListener() {
-                        @Override
-                        public void onSuccess(IMqttToken asyncActionToken) {
-                            // We are connected
-                            Log.d("mqtt", "onSuccess");
-//-----------------------------------------------------------------------------------------------
-                            //PUBLISH THE MESSAGE
-                            MqttMessage message = new MqttMessage(editText.getText().toString().getBytes());
-                            message.setQos(0);
-                            message.setRetained(false);
-
-                            //mqtt topic
-                            String topic = "sensor/test";
-
-                            try {
-                                client.publish(topic, message);
-                                Log.i("mqtt", "Message published");
-
-                                // client.disconnect();
-                                //Log.i("mqtt", "client disconnected");
-
-                            } catch (MqttException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            }
-
-                        }
-
-                        @Override
-                        public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
-                            // Something went wrong e.g. connection timeout or firewall problems
-                            Log.d("mqtt", "onFailure");
-
-                        }
-
-                    });
-
-
-                } catch (MqttException e) {
-                    e.printStackTrace();
-                }
 
             }});
 
@@ -111,9 +104,51 @@ public class ChatFragment extends Fragment {
         return rootView;
         }
 
-    private void updateList(Bundle bundle) {
-        textView.setText(bundle.getString("message"));
+    private static class ViewHolder {
+        TextView tvName;
+        TextView tvStatus;
+        //ImageView info;
     }
 
+    public class CustomAdapter extends ArrayAdapter<String> {
+        int lastPosition = -1;
+
+        Context mContext;
+        public CustomAdapter(ArrayList<String> contacts, int resources, Context context) {
+            super(context, resources, contacts);
+            this.mContext=context;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            ViewHolder viewHolder;
+            String txt = getItem(position);
+            final View result;
+            // Check if an existing view is being reused, otherwise inflate the view
+            if (convertView == null) {
+                viewHolder = new ViewHolder();
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.contact_frame, parent, false);
+                viewHolder.tvName = (TextView) convertView.findViewById(R.id.contact_frame_name);
+                viewHolder.tvStatus  = (TextView) convertView.findViewById(R.id.contact_frame_status);
+                result = convertView;
+                convertView.setTag(viewHolder);
+            }
+            else {
+                viewHolder = (ViewHolder) convertView.getTag();
+                result = convertView;
+            }
+
+            Animation animation = AnimationUtils.loadAnimation(mContext, android.R.anim.fade_in);
+                // Animation animation = AnimationUtils.loadAnimation(mContext, (position > lastPosition) ? R.anim.up_from_bottom : R.anim.down_from_top);
+            result.startAnimation(animation);
+
+            lastPosition = position;
+
+            viewHolder.tvName.setText("User");
+            viewHolder.tvStatus.setText(txt.toString());
+
+            return convertView;
+        }
+    }
 
 }

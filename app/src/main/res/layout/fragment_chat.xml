@@ -6,23 +6,29 @@
     android:orientation="vertical">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:id="@+id/chatfrag_tv"
+    <ListView
+        android:id="@+id/listView_chat"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/hello_blank_fragment" />
-
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="?listPreferredItemHeight"
+        android:orientation="horizontal">
     <EditText
         android:id="@+id/editTextChat"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
+        android:layout_weight="8"
+        android:layout_gravity="center_vertical"
         android:layout_height="wrap_content"
         android:ems="10"
         android:inputType="text"/>
-
     <Button
         android:id="@+id/button"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
+        android:layout_weight="2"
         android:layout_height="wrap_content"
-        android:text="Submit" />
+        android:text="Send" />
+    </LinearLayout>
 
 </LinearLayout>
