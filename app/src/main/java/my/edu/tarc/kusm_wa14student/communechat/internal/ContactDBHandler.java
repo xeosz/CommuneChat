@@ -1,4 +1,4 @@
-package my.edu.tarc.kusm_wa14student.communechat.components;
+package my.edu.tarc.kusm_wa14student.communechat.internal;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -95,13 +95,15 @@ public class ContactDBHandler extends SQLiteOpenHelper {
             cursor.moveToFirst();
 
         Contact contact = new Contact(
-                Integer.parseInt(cursor.getString(0)),  //id
+                cursor.getInt(0),                       //id
                 cursor.getString(1),                    //username
                 cursor.getString(2),                    //nickname
-                Integer.parseInt(cursor.getString(3)),  //gender
+                cursor.getInt(3),                       //gender
                 cursor.getString(4),                    //status
-                Integer.parseInt(cursor.getString(5)),  //last online
-                cursor.getString(6));                   //phone number
+                cursor.getInt(5),                       //last online
+                cursor.getString(6)                     //phone number
+        );
+        db.close();
         // return contact
         return contact;
     }
@@ -110,37 +112,38 @@ public class ContactDBHandler extends SQLiteOpenHelper {
     public List<Contact> getAllContacts() {
         List<Contact> contactList = new ArrayList<Contact>();
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_CONTACTS;
+        String selectQuery = "SELECT " + KEY_ID + ", " + KEY_USERNAME + ", " + KEY_NICKNAME + ", " + KEY_GENDER + ", " + KEY_STATUS + ", "
+                + KEY_LAST_ONLINE + ", " + KEY_PH_NO + " FROM " + TABLE_CONTACTS;
 
-        SQLiteDatabase db = this.getWritableDatabase();
+        SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         // looping through all rows and adding to list
-        if (cursor.moveToFirst()) {
-            do {
+        while (cursor.moveToNext()) {
                 Contact contact = new Contact();
-                contact.setUid(Integer.parseInt(cursor.getString(0)));
+
+            contact.setUid(cursor.getInt(0));
                 contact.setUsername(cursor.getString(1));
                 contact.setNickname(cursor.getString(2));
-                contact.setGender(Integer.parseInt(cursor.getString(3)));
+            contact.setGender(cursor.getInt(3));
                 contact.setStatus(cursor.getString(4));
-                contact.setLast_online(Integer.parseInt(cursor.getString(5)));
+            contact.setLast_online(cursor.getInt(5));
                 contact.setPhone_number(cursor.getString(6));
                 // Adding contact to list
                 contactList.add(contact);
-            } while (cursor.moveToNext());
         }
-
+        db.close();
         // return contact list
         return contactList;
     }
 
     // Getting contacts Count
     public int getContactsCount() {
-        String countQuery = "SELECT  COUNT(*) FROM " + TABLE_CONTACTS;
+        String countQuery = "SELECT  COUNT(*) FROM '" + TABLE_CONTACTS + "';";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
         cursor.moveToFirst();
+        db.close();
         // return count
         return cursor.getInt(0);
     }
@@ -176,4 +179,22 @@ public class ContactDBHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL(clearDBQuery);
     }
+
+    public boolean isTableExists() {
+        String sql = "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='" + TABLE_CONTACTS + "';";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cs = db.rawQuery(sql, null);
+        cs.moveToFirst();
+        db.close();
+        return cs.getInt(0) == 1;
+    }
+
+    public void clearTable() {
+        if (this.isTableExists()) {
+            SQLiteDatabase db = this.getWritableDatabase();
+            db.delete(TABLE_CONTACTS, null, null);
+            db.close();
+        }
+    }
+
 }

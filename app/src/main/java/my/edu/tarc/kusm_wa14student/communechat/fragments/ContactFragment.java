@@ -1,152 +1,227 @@
 package my.edu.tarc.kusm_wa14student.communechat.fragments;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.DataSetObserver;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.eclipse.paho.android.service.MqttAndroidClient;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-
 import java.util.ArrayList;
-import java.util.Date;
 
-import my.edu.tarc.kusm_wa14student.communechat.MainActivity;
+import my.edu.tarc.kusm_wa14student.communechat.ProfileActivity;
 import my.edu.tarc.kusm_wa14student.communechat.R;
-import my.edu.tarc.kusm_wa14student.communechat.components.MqttHelper;
-import my.edu.tarc.kusm_wa14student.communechat.components.ContactDBHandler;
+import my.edu.tarc.kusm_wa14student.communechat.internal.ContactDBHandler;
+import my.edu.tarc.kusm_wa14student.communechat.internal.MqttHelper;
+import my.edu.tarc.kusm_wa14student.communechat.internal.MqttMessageHandler;
 import my.edu.tarc.kusm_wa14student.communechat.model.Contact;
-import my.edu.tarc.kusm_wa14student.communechat.model.User;
+import my.edu.tarc.kusm_wa14student.communechat.model.MqttCommand;
 
 public class ContactFragment extends Fragment {
-    private ArrayList<Contact> contacts = new ArrayList<>();
-
-    private ListView listView;
-    private TextView tvMain;
-
-    private CustomAdapter adapter;
-
     //MQTTClient configuration
-    public MqttAndroidClient mqttAndroidClient;
-    final private String serverUri = "tcp://m11.cloudmqtt.com:17391";
-    final private String clientId = "ear12312a";
     final private String subscriptionTopic = "sensor/test";
-    final private String USER_TOPIC = "testuser";
-    final private String username = "ehvfrtgx";
-    final private String password = "YPcMC08pYYpr";
-    private MqttHelper mqttHelper;
-
+    UpdateListTask task = new UpdateListTask();
     private String TAG = "ContactFragment";
+    //ListViewAdapter variables
+    private ArrayList<Contact> contacts = new ArrayList<>();
+    private CustomAdapter adapter;
+    //Fragment Views
+    private ListView contactListView;
+    private TextView tvMain;
+    private ProgressBar progressBar;
+    private ContactDBHandler db;
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String message = intent.getStringExtra("message");
+            task = new UpdateListTask();
+            task.execute(message);
+        }
+    };
 
     public ContactFragment() {
         // Required empty public constructor
     }
 
+    public static void clearAsyncTask(AsyncTask<?, ?, ?> asyncTask) {
+        if (asyncTask != null) {
+            if (!asyncTask.isCancelled()) {
+                asyncTask.cancel(true);
+            }
+            asyncTask = null;
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        clearAsyncTask(task);
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_contact, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_contact, container, false);
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
+                mMessageReceiver, new IntentFilter("MessageEvent"));
+
         // Inflate the layout for this fragment
-        tvMain = (TextView) rootView.findViewById(R.id.tv_contact_fragment);
-
         contacts = new ArrayList<>();
-        ContactDBHandler db = new ContactDBHandler(getActivity());
 
-        if(db.getContactsCount()<=0){
-            // Inserting Contacts
-            populateContactDB();
-        }
+        tvMain = rootView.findViewById(R.id.tv_contact_fragment);
+        contactListView = rootView.findViewById(R.id.listView_contact);
+        progressBar = rootView.findViewById(R.id.progressBar_contact_fragment);
+        progressBar.setVisibility(View.INVISIBLE);
+        adapter = new CustomAdapter(contacts, 0, getActivity());
+        contactListView.setAdapter(adapter);
 
-        // Reading all contacts
-        contacts = (ArrayList<Contact>) db.getAllContacts();
+        db = new ContactDBHandler(getContext());
+
+        adapter.registerDataSetObserver(new DataSetObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                checkContent(contacts, rootView);
+            }
+        });
+        contactListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent intent = new Intent(getActivity(), ProfileActivity.class);
+                Contact tempContact = (Contact) contactListView.getItemAtPosition(i);
+                Bundle bundle = new Bundle();
+                intent.putExtras(bundle);
+                getActivity().startActivity(intent);
+
+                //OnClick Animation
+                Animation onClickAnimation = new AlphaAnimation(0.3f, 1.0f);
+                onClickAnimation.setDuration(2000);
+                view.startAnimation(onClickAnimation);
+            }
+        });
+
+        getContactList();
+
+        //TODO: temp function change if login implemented
+        requestContactData("1000000000");
+
+        //Check list contents
         checkContent(contacts, rootView);
         return rootView;
     }
-    private void populateContactDB(){
-        ContactDBHandler db = new ContactDBHandler(getActivity());
-        Contact c = new Contact(103210005, "username", "nickname0", 1, "ok", 1232415641, "0123456789");
-        db.addContact(c);
-        db.addContact(new Contact(100000006, "username", "nickname1", 1, "status", (int) (new Date().getTime() * 1000), "0123456789"));
-        db.addContact(new Contact(100000007, "username", "nickname2", 1, "status", (int) (new Date().getTime() * 1000), "0123456789"));
-        db.addContact(new Contact(100000008, "username", "nickname3", 1, "status", (int) (new Date().getTime() * 1000), "0123456789"));
-        db.addContact(new Contact(100000009, "username", "nickname4", 1, "status", (int) (new Date().getTime() * 1000), "0123456789"));
-        db.addContact(new Contact(100000000, "username", "nickname5", 1, "status", (int) (new Date().getTime() * 1000), "0123456789"));
-        db.addContact(new Contact(100000001, "username", "nickname6", 1, "status", (int) (new Date().getTime() * 1000), "0123456789"));
-        db.addContact(new Contact(100000002, "username", "nickname7", 1, "status", (int) (new Date().getTime() * 1000), "0123456789"));
-        db.addContact(new Contact(100000003, "username", "nickname9", 1, "status", (int) (new Date().getTime() * 1000), "0123456789"));
-        db.addContact(new Contact(100000004, "username", "nickname9", 1, "status", (int) (new Date().getTime() * 1000), "0123456789"));
-        db.addContact(new Contact(100000012, "username", "nickname0", 1, "status", (int) (new Date().getTime() * 1000), "0123456789"));
-        db.addContact(new Contact(100000032, "username", "nicknm123", 1, "status", (int) (new Date().getTime() * 1000), "0123456789"));
+
+    private void getContactList() {
+        contacts.clear();
+        ArrayList<Contact> dbContacts = (ArrayList<Contact>) db.getAllContacts();
+        for (Contact c : dbContacts)
+            contacts.add(c);
+        adapter.notifyDataSetChanged();
     }
-    public void checkContent(ArrayList contacts, View rootView){
-        if(!contacts.isEmpty()){
+
+    public void checkContent(ArrayList contacts, View rootView) {
+        if (!contacts.isEmpty()) {
             tvMain.setVisibility(View.INVISIBLE);
-            adapter = new CustomAdapter(contacts, 0, getActivity());
-            listView = (ListView) rootView.findViewById(R.id.listView_contact);
-            listView.setAdapter(adapter);
-        }else
-        {
+        } else {
             tvMain.setText("Opps! No contact at the moment.");
             tvMain.setVisibility(View.VISIBLE);
         }
     }
 
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
-    }
-
-    private ArrayList<Contact> requestContactData(String uid){
+    private ArrayList<Contact> requestContactData(String uid) {
         ArrayList<Contact> result = new ArrayList<>();
-        ((MainActivity)getActivity()).setCallback(new MqttCallbackExtended() {
-            @Override
-            public void connectComplete(boolean reconnect, String serverURI) {
-            }
-
-            @Override
-            public void connectionLost(Throwable cause) {
-
-            }
-
-            @Override
-            public void messageArrived(String topic, MqttMessage message) throws Exception {
-
-            }
-
-            @Override
-            public void deliveryComplete(IMqttDeliveryToken token) {
-
-            }
-        });
-        ((MainActivity)getActivity()).mqttPublishMessage(USER_TOPIC, uid);
+        MqttMessageHandler msg = new MqttMessageHandler();
+        msg.encode(MqttCommand.REQ_CONTACT_LIST, uid);
+        MqttHelper.publish(subscriptionTopic, msg.getPublish());
         return result;
     }
 
+    //-----Adapter Class-----
     private static class ViewHolder {
         TextView tvName;
         TextView tvStatus;
         //ImageView info;
     }
 
-    public class CustomAdapter extends ArrayAdapter<Contact>{
+    private class UpdateListTask extends AsyncTask<String, Void, Void> {
+
+
+        @Override
+        protected void onPreExecute() {
+            progressBar.setVisibility(View.VISIBLE);
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Void doInBackground(String... strings) {
+
+            if (!strings[0].isEmpty()) {
+                MqttMessageHandler handler = new MqttMessageHandler();
+                handler.setReceived(strings[0]);
+                if (handler.mqttCommand != null) {
+                    switch (handler.mqttCommand) {
+                        case REQ_CONTACT_LIST:
+                            break;
+                        case ACK_CONTACT_LIST: {
+                            db.clearTable();
+
+                            ArrayList<Contact> contactList = handler.getContactList();
+                            for (Contact temp : contactList)
+                                db.addContact(temp);
+                            break;
+                        }
+                        case REQ_CONTACT_DETAILS:
+                            break;
+                        case ACK_CONTACT_DETAILS:
+                            break;
+                        case REQ_USER_PROFILE:
+                            break;
+                        case ACK_USER_PROFILE:
+                            break;
+                        case REQ_SEARCH_USER:
+                            break;
+                        case ACK_SEARCH_USER:
+                            break;
+                        case KEEP_ALIVE:
+                            break;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            progressBar.setVisibility(View.GONE);
+            getContactList();
+        }
+    }
+
+    public class CustomAdapter extends ArrayAdapter<Contact> {
         int lastPosition = -1;
 
         Context mContext;
-        public CustomAdapter(ArrayList<Contact> contacts,int resources, Context context) {
+
+        public CustomAdapter(ArrayList<Contact> contacts, int resources, Context context) {
             super(context, resources, contacts);
-            this.mContext=context;
+            this.mContext = context;
         }
+
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             ViewHolder viewHolder;
@@ -157,11 +232,10 @@ public class ContactFragment extends Fragment {
                 viewHolder = new ViewHolder();
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.contact_frame, parent, false);
                 viewHolder.tvName = (TextView) convertView.findViewById(R.id.contact_frame_name);
-                viewHolder.tvStatus  = (TextView) convertView.findViewById(R.id.contact_frame_status);
+                viewHolder.tvStatus = (TextView) convertView.findViewById(R.id.contact_frame_status);
                 result = convertView;
                 convertView.setTag(viewHolder);
-            }
-            else {
+            } else {
                 viewHolder = (ViewHolder) convertView.getTag();
                 result = convertView;
             }

@@ -1,89 +1,83 @@
 package my.edu.tarc.kusm_wa14student.communechat;
 
+import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.internal.BottomNavigationItemView;
 import android.support.design.internal.BottomNavigationMenuView;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 
-import org.eclipse.paho.client.mqttv3.*;
-
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 
-import my.edu.tarc.kusm_wa14student.communechat.components.MqttHelper;
 import my.edu.tarc.kusm_wa14student.communechat.adapter.ViewPagerAdapter;
 import my.edu.tarc.kusm_wa14student.communechat.fragments.ChatFragment;
 import my.edu.tarc.kusm_wa14student.communechat.fragments.ContactFragment;
 import my.edu.tarc.kusm_wa14student.communechat.fragments.SearchFragment;
 import my.edu.tarc.kusm_wa14student.communechat.fragments.UserFragment;
+import my.edu.tarc.kusm_wa14student.communechat.internal.MessageService;
+import my.edu.tarc.kusm_wa14student.communechat.internal.MqttHelper;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
 
-    private final MainActivity mainActivity = this;
+    //CustomViewPagerAdapter Variables;
+    private ViewPagerAdapter adapter;
+    private int NUMBER_OF_SCREENS = 4;
+    private MenuItem prevMenuItem;
 
-    private ArrayList<String> connectionMap;
-
-    private MqttHelper mqttHelper;
-
+    //MainActivity Views
     private ViewPager viewPager;
     private BottomNavigationView bottomNavView;
 
+    //Viewpager's Fragments
     private ContactFragment contactFragment;
     private SearchFragment searchFragment;
     private UserFragment userFragment;
     private ChatFragment chatFragment;
 
-    private MenuItem prevMenuItem;
-    private SelectedBundle selectedBundle;
+    private BroadcastReceiver mMessageReceiver;
 
-    private String clientId = "10000001";
+    //Static Mqtt Connection Variables
+    private MqttHelper mqttHelper;
+    private String clientId = "1000000000";
     private String serverUri = "tcp://m11.cloudmqtt.com:17391";
     private String mqttUsername = "ehvfrtgx";
     private String mqttPassword = "YPcMC08pYYpr";
-    private String clientTopic = "";
+    private String clientTopic = "sensor/test";
     private int QoS = 1;
-    private ViewPagerAdapter adapter;
-    private int NUMBER_OF_SCREENS = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //Start service
+        startService(new Intent(MainActivity.this, MessageService.class));
+
         //Initialize views
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         bottomNavView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
-        BottomNavigationViewHelper.removeShiftMode(bottomNavView);
-        //viewPager.setOffscreenPageLimit(NUMBER_OF_SCREENS);
-        bottomNavView.setOnNavigationItemSelectedListener(
-                new BottomNavigationView.OnNavigationItemSelectedListener() {
-                    @Override
-                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                        switch (item.getItemId()) {
-                            case R.id.contact_tab:
-                                viewPager.setCurrentItem(0);
-                                break;
-                            case R.id.chat_tab:
-                                viewPager.setCurrentItem(1);
-                                break;
-                            case R.id.search_tab:
-                                viewPager.setCurrentItem(2);
-                                break;
-                            case R.id.user_tab:
-                                viewPager.setCurrentItem(3);
-                                break;
-                        }
-                        return false;
-                    }
-                });
+        adapter = new ViewPagerAdapter(getSupportFragmentManager());
+        contactFragment = new ContactFragment();
+        chatFragment = new ChatFragment();
+        searchFragment = new SearchFragment();
+        userFragment = new UserFragment();
 
+        adapter.addFragment(contactFragment);
+        adapter.addFragment(chatFragment);
+        adapter.addFragment(searchFragment);
+        adapter.addFragment(userFragment);
+
+
+
+        BottomNavigationViewHelper.removeShiftMode(bottomNavView);
+
+        viewPager.setOffscreenPageLimit(NUMBER_OF_SCREENS);
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -107,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-       /*  //Disable ViewPager Swipe
+       /*//Disable ViewPager Swipe
        viewPager.setOnTouchListener(new View.OnTouchListener()
         {
             @Override
@@ -117,40 +111,27 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         */
-        setupViewPager(viewPager);
-        startMqtt();
-    }
-    public void setCallback(MqttCallbackExtended callback){
-        this.mqttHelper.setCallback(callback);
-    }
-    public void mqttSubscribeTopic(String topic){
-        this.mqttHelper.subscribe(topic, QoS);
-    }
-    public void mqttPublishMessage(String topic, String payload){
-        this.mqttHelper.publish(topic, payload, QoS, false);
-    }
-    public void mqttUnsubscribeTopic(String topic){
-        this.mqttHelper.unsubscribe(topic);
-    }
-    public void disconnectMqtt(){
-        this.mqttHelper.disconnect();
-    }
-    private void startMqtt() {
-        mqttHelper = new MqttHelper(getApplicationContext(), serverUri, clientId);
-        mqttHelper.setConnectionOptions(mqttUsername,mqttPassword);
-        mqttHelper.subscribe(clientTopic,QoS);
-    }
+        bottomNavView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch (item.getItemId()) {
+                    case R.id.contact_tab:
+                        viewPager.setCurrentItem(0);
+                        break;
+                    case R.id.chat_tab:
+                        viewPager.setCurrentItem(1);
+                        break;
+                    case R.id.search_tab:
+                        viewPager.setCurrentItem(2);
+                        break;
+                    case R.id.user_tab:
+                        viewPager.setCurrentItem(3);
+                        break;
+                }
+                return false;
+            }
+        });
 
-    private void setupViewPager(ViewPager viewPager) {
-        adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        contactFragment =new ContactFragment();
-        chatFragment = new ChatFragment();
-        searchFragment= new SearchFragment();
-        userFragment = new UserFragment();
-        adapter.addFragment(contactFragment);
-        adapter.addFragment(chatFragment);
-        adapter.addFragment(searchFragment);
-        adapter.addFragment(userFragment);
         viewPager.setAdapter(adapter);
     }
 
@@ -176,20 +157,4 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //selectedBundle.onBundleSelect(bundle);
-    }
-    public void setOnBundleSelected(SelectedBundle selectedBundle) {
-        this.selectedBundle = selectedBundle;
-    }
-    public interface SelectedBundle {
-        void onBundleSelect(Bundle bundle);
-    }
-
-
-
-
-
-
 }

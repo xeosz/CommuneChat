@@ -1,45 +1,46 @@
 package my.edu.tarc.kusm_wa14student.communechat.fragments;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import org.eclipse.paho.android.service.MqttAndroidClient;
-import org.eclipse.paho.client.mqttv3.IMqttActionListener;
-import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
-import org.eclipse.paho.client.mqttv3.IMqttToken;
-import org.eclipse.paho.client.mqttv3.MqttCallback;
-import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
-import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
-import org.eclipse.paho.client.mqttv3.MqttException;
-import org.eclipse.paho.client.mqttv3.MqttMessage;
-
 import java.util.ArrayList;
-import java.util.Map;
 
-import my.edu.tarc.kusm_wa14student.communechat.MainActivity;
+import my.edu.tarc.kusm_wa14student.communechat.ProfileActivity;
 import my.edu.tarc.kusm_wa14student.communechat.R;
 
 public class ChatFragment extends Fragment {
+
     private ListView chatListView;
     private EditText editText;
     private Button btn;
-    private ArrayList<String> list;
+    private ArrayList<String> list = new ArrayList<>();
     private CustomAdapter adapter;
-    private Bundle savedState = null;
+    private Bundle bundle = new Bundle();
+    private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String message = intent.getStringExtra("message");
+            updateList(message);
+        }
+    };
 
     public ChatFragment() {
         // Required empty public constructor
@@ -48,14 +49,8 @@ public class ChatFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if(savedInstanceState != null && savedState == null) {
-            savedState = savedInstanceState.getBundle("list");
-        }
-        if(savedState != null) {
-            list = new ArrayList<>();
-            list.addAll(savedState.getStringArrayList("list"));
-        }
-        savedState = null;
+        LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
+                mMessageReceiver, new IntentFilter("MessageEvent"));
     }
 
     @Override
@@ -68,31 +63,27 @@ public class ChatFragment extends Fragment {
 
         list = new ArrayList<String>();
         list.add("test");
-        adapter = new CustomAdapter(list,0,getActivity());
+
+        adapter = new CustomAdapter(list, 0, getActivity());
         chatListView.setAdapter(adapter);
 
-        ((MainActivity)getActivity()).setCallback(new MqttCallbackExtended() {
+        chatListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void connectComplete(boolean reconnect, String serverURI) {
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent intent = new Intent(getActivity(), ProfileActivity.class);
+                String temp = (String) chatListView.getItemAtPosition(i);
+                Bundle bundle = new Bundle();
+                bundle.putString("message", temp);
+                intent.putExtras(bundle);
+                getActivity().startActivity(intent);
 
-            }
-
-            @Override
-            public void connectionLost(Throwable cause) {
-
-            }
-
-            @Override
-            public void messageArrived(String topic, MqttMessage message) throws Exception {
-                list.add(message.toString());
-                adapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void deliveryComplete(IMqttDeliveryToken token) {
-
+                //OnClick Animation
+                Animation onClickAnimation = new AlphaAnimation(0.3f, 1.0f);
+                onClickAnimation.setDuration(2000);
+                view.startAnimation(onClickAnimation);
             }
         });
+
 
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,6 +95,11 @@ public class ChatFragment extends Fragment {
         return rootView;
         }
 
+    private void updateList(String msg) {
+        list.add(msg);
+        adapter.notifyDataSetChanged();
+    }
+
     private static class ViewHolder {
         TextView tvName;
         TextView tvStatus;
@@ -114,8 +110,9 @@ public class ChatFragment extends Fragment {
         int lastPosition = -1;
 
         Context mContext;
-        public CustomAdapter(ArrayList<String> contacts, int resources, Context context) {
-            super(context, resources, contacts);
+
+        public CustomAdapter(ArrayList<String> txt, int resources, Context context) {
+            super(context, resources, txt);
             this.mContext=context;
         }
 

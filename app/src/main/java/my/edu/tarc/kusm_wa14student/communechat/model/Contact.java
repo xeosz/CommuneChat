@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
 import java.io.ByteArrayOutputStream;
-import java.util.Date;
 
 /**
  * Created by Xeosz on 27-Sep-17.
@@ -21,6 +20,18 @@ public class Contact {
     private byte[] image;
 
     public Contact() {
+
+    }
+
+    //Constructor w/o image
+    public Contact(int uid, String username, String nickname, int gender, String status, int last_online, String phone_number) {
+        this.uid = uid;
+        this.username = username;
+        this.nickname = nickname;
+        this.gender = gender;
+        this.last_online = last_online;
+        this.status = status;
+        this.phone_number = phone_number;
 
     }
 
@@ -87,19 +98,6 @@ public class Contact {
     public void setImage(byte[] image) {
         this.image = image;
     }
-
-    //Constructor w/o image
-    public Contact(int uid, String username, String nickname, int gender, String status, int last_online, String phone_number) {
-        this.uid = uid;
-        this.username = username;
-        this.nickname = nickname;
-        this.gender = gender;
-        this.last_online = last_online;
-        this.status = status;
-        this.phone_number = phone_number;
-
-    }
-
 
     private class DbBitmapUtility {
 

@@ -2,8 +2,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="my.edu.tarc.kusm_wa14student.communechat.fragments.ContactFragment"
-    android:background="@android:color/white">
+    android:background="@android:color/white"
+    tools:context="my.edu.tarc.kusm_wa14student.communechat.fragments.ContactFragment">
+
+    <ProgressBar
+        android:id="@+id/progressBar_contact_fragment"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
 
     <TextView
         android:id="@+id/tv_contact_fragment"
@@ -18,5 +25,4 @@
         android:id="@+id/listView_contact"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-
 </FrameLayout>
