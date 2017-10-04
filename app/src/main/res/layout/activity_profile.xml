@@ -1,23 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="my.edu.tarc.kusm_wa14student.communechat.ProfileActivity">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView"
-        android:textSize="28sp" />
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="TextView"
-        android:textSize="28sp" />
+        <Button
+            android:id="@+id/button_back_user_profile"
+            android:layout_width="@dimen/up_button_size"
+            android:layout_height="@dimen/up_button_size"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="@dimen/activity_horizontal_margin"
+            android:layout_marginTop="@dimen/activity_vertical_margin"
+            android:background="@drawable/ic_arrow_back"
+            android:backgroundTint="@android:color/white"
+            android:elevation="5dp"
+            android:scaleType="fitCenter" />
 
-</LinearLayout>
+        <ImageView
+            android:id="@+id/header_cover_image"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:scaleType="centerCrop"
+            android:src="@drawable/profile_header_image" />
+
+        <my.edu.tarc.kusm_wa14student.communechat.components.CircleImageView
+            android:id="@+id/user_profile_photo"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_below="@+id/header_cover_image"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="-60dp"
+            android:elevation="5dp"
+            android:padding="20dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_person"
+            app:civ_fill_color="@android:color/background_light" />
+
+
+        <RelativeLayout
+            android:id="@+id/profile_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/header_cover_image"
+            android:background="@color/colorPrimary"
+            android:elevation="4dp"
+            android:paddingBottom="24dp">
+
+
+            <TextView
+                android:id="@+id/textView_user_profile_nickname"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="76dp"
+                android:textColor="#fff"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/imageView_user_gender"
+                android:layout_width="20pt"
+                android:layout_height="20pt"
+                android:layout_above="@+id/textView_user_profile_username"
+                android:layout_alignTop="@+id/textView_user_profile_nickname"
+                android:layout_toRightOf="@+id/textView_user_profile_nickname"
+                android:paddingLeft="@dimen/gender_icon_padding"
+                android:paddingRight="@dimen/gender_icon_padding" />
+
+
+            <TextView
+                android:id="@+id/textView_user_profile_username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textView_user_profile_nickname"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="12dp"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:textColor="#fff"
+                android:textSize="14sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/textView_user_profile_nickname"
+                android:layout_marginTop="@dimen/activity_vertical_margin"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <ImageButton
+                    android:id="@+id/imageButton_profile_call"
+                    android:layout_width="@dimen/profile_button_size"
+                    android:layout_height="@dimen/profile_button_size"
+                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                    android:layout_marginRight="@dimen/activity_horizontal_margin"
+                    android:background="@drawable/round_button"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_phone" />
+
+                <ImageButton
+                    android:id="@+id/imageButton_profile_message"
+                    android:layout_width="@dimen/profile_button_size"
+                    android:layout_height="@dimen/profile_button_size"
+                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                    android:layout_marginRight="@dimen/activity_horizontal_margin"
+                    android:background="@drawable/round_button"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_chat" />
+
+                <ImageButton
+                    android:id="@+id/imageButton_profile_setting"
+                    android:layout_width="@dimen/profile_button_size"
+                    android:layout_height="@dimen/profile_button_size"
+                    android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                    android:layout_marginRight="@dimen/activity_horizontal_margin"
+                    android:background="@drawable/round_button"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_settings" />
+
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/profile_layout"
+            android:layout_marginTop="5dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:background="#fff"
+                android:clickable="true"
+                android:elevation="4dp"
+                android:padding="20dp"
+                android:text="Reserved template" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:background="#fff"
+                android:clickable="true"
+                android:elevation="4dp"
+                android:padding="20dp"
+                android:text="Reserved template" />
+
+
+        </LinearLayout>
+    </RelativeLayout>
+</ScrollView>

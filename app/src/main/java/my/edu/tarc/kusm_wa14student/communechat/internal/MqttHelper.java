@@ -25,15 +25,24 @@ public final class MqttHelper {
     public static String defaultTopic = "sensor/test";
     private static MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
     private static DisconnectedBufferOptions disconnectedBufferOptions = new DisconnectedBufferOptions();
+
     //Static MQTT Connection Variables
-    private static String clientId = "1000000000";
+    private static String clientId;
     private static String serverUri = "tcp://m11.cloudmqtt.com:17391";
     private static String mqttUsername = "ehvfrtgx";
     private static String mqttPassword = "YPcMC08pYYpr";
     private static int QoS = 1;
     private static boolean retain = false;
 
+    private static String generateClientId() {
+        String result;
+        //result = "android/"+UUID.randomUUID();
+        result = "100";
+        return result;
+    }
+
     public static void startMqtt(Context context) {
+        clientId = generateClientId();
         mqttAndroidClient = new MqttAndroidClient(context, serverUri, clientId);
     }
 

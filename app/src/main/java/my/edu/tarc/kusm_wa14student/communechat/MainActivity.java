@@ -74,7 +74,6 @@ public class MainActivity extends AppCompatActivity {
         adapter.addFragment(userFragment);
 
 
-
         BottomNavigationViewHelper.removeShiftMode(bottomNavView);
 
         viewPager.setOffscreenPageLimit(NUMBER_OF_SCREENS);

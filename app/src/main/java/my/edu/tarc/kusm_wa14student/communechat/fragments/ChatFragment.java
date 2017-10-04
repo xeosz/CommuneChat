@@ -23,7 +23,6 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-import my.edu.tarc.kusm_wa14student.communechat.ProfileActivity;
 import my.edu.tarc.kusm_wa14student.communechat.R;
 
 public class ChatFragment extends Fragment {
@@ -70,12 +69,6 @@ public class ChatFragment extends Fragment {
         chatListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent intent = new Intent(getActivity(), ProfileActivity.class);
-                String temp = (String) chatListView.getItemAtPosition(i);
-                Bundle bundle = new Bundle();
-                bundle.putString("message", temp);
-                intent.putExtras(bundle);
-                getActivity().startActivity(intent);
 
                 //OnClick Animation
                 Animation onClickAnimation = new AlphaAnimation(0.3f, 1.0f);
@@ -88,7 +81,6 @@ public class ChatFragment extends Fragment {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
             }});
 
         // Inflate the layout for this fragment

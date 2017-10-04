@@ -85,12 +85,12 @@ public class ContactDBHandler extends SQLiteOpenHelper {
     }
 
     // Getting single contact
-    public Contact getContact(int id) {
+    public Contact getContact(String username) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_CONTACTS,
-                new String[] { KEY_ID, KEY_USERNAME, KEY_NICKNAME, KEY_GENDER, KEY_STATUS, KEY_LAST_ONLINE, KEY_PH_NO }, KEY_ID + "=?",
-                new String[] { String.valueOf(id) }, null, null, null, null);
+                new String[]{KEY_ID, KEY_USERNAME, KEY_NICKNAME, KEY_GENDER, KEY_STATUS, KEY_LAST_ONLINE, KEY_PH_NO}, KEY_USERNAME + "=?",
+                new String[]{String.valueOf(username)}, null, null, null, null);
         if (cursor != null)
             cursor.moveToFirst();
 

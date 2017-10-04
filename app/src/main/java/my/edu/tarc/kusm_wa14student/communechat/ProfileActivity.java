@@ -7,18 +7,34 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import my.edu.tarc.kusm_wa14student.communechat.internal.ContactDBHandler;
+import my.edu.tarc.kusm_wa14student.communechat.model.Contact;
+
+/*
+*   Future implementations such as Photos, Timeline/Wall
+*   should request data from the web server and replace data in internal db
+*   instead of just retrieve data from previous activity.
+* */
+
 
 public class ProfileActivity extends AppCompatActivity {
 
-
-    private TextView tv1, tv2;
+    //Views
+    private TextView tvNickname, tvUsername;
+    private ImageView ivGender;
+    private ImageButton ibCall, ibMessage, ibSettings;
+    private Button btnBack;
 
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String message = intent.getStringExtra("message");
-            updateList(message);
         }
     };
 
@@ -31,18 +47,53 @@ public class ProfileActivity extends AppCompatActivity {
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 mMessageReceiver, new IntentFilter("MessageEvent"));
 
-
-        tv1 = (TextView) findViewById(R.id.textView);
-        tv2 = (TextView) findViewById(R.id.textView2);
-
+        //Get bundle
         Bundle extras = getIntent().getExtras();
-        tv1.setText(extras.getString("message"));
+        String fid = extras.getString("fid");
+        Contact contact = getContactDetails(fid);
+
+        //Initialize views
+        btnBack = (Button) findViewById(R.id.button_back_user_profile);
+        tvNickname = (TextView) findViewById(R.id.textView_user_profile_nickname);
+        tvUsername = (TextView) findViewById(R.id.textView_user_profile_username);
+        ivGender = (ImageView) findViewById(R.id.imageView_user_gender);
+        ibCall = (ImageButton) findViewById(R.id.imageButton_profile_call);
+        ibMessage = (ImageButton) findViewById(R.id.imageButton_profile_message);
+        ibSettings = (ImageButton) findViewById(R.id.imageButton_profile_setting);
+
+        tvNickname.setText(contact.getNickname());
+        tvUsername.setText("Username: " + contact.getUsername());
+
+        if (contact.getGender() == 0) {
+            ivGender.setImageDrawable(getResources().getDrawable(R.drawable.ic_boys));
+        }
+        if (contact.getGender() == 1) {
+            ivGender.setImageDrawable(getResources().getDrawable(R.drawable.ic_girls));
+        }
+
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onBackPressed();
+            }
+        });
+
+        ibMessage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
 
     }
 
-    public void updateList(String msg) {
-        tv2.setText(msg);
+    private Contact getContactDetails(String id) {
+        ContactDBHandler db = new ContactDBHandler(this);
+        return db.getContact(id);
     }
 
 
 }
+
+

@@ -29,7 +29,6 @@ import my.edu.tarc.kusm_wa14student.communechat.internal.ContactDBHandler;
 import my.edu.tarc.kusm_wa14student.communechat.internal.MqttHelper;
 import my.edu.tarc.kusm_wa14student.communechat.internal.MqttMessageHandler;
 import my.edu.tarc.kusm_wa14student.communechat.model.Contact;
-import my.edu.tarc.kusm_wa14student.communechat.model.MqttCommand;
 
 public class ContactFragment extends Fragment {
     //MQTTClient configuration
@@ -104,6 +103,9 @@ public class ContactFragment extends Fragment {
                 Intent intent = new Intent(getActivity(), ProfileActivity.class);
                 Contact tempContact = (Contact) contactListView.getItemAtPosition(i);
                 Bundle bundle = new Bundle();
+
+                bundle.putString("fid", tempContact.getUsername());
+
                 intent.putExtras(bundle);
                 getActivity().startActivity(intent);
 
@@ -144,7 +146,7 @@ public class ContactFragment extends Fragment {
     private ArrayList<Contact> requestContactData(String uid) {
         ArrayList<Contact> result = new ArrayList<>();
         MqttMessageHandler msg = new MqttMessageHandler();
-        msg.encode(MqttCommand.REQ_CONTACT_LIST, uid);
+        msg.encode(MqttMessageHandler.MqttCommand.REQ_CONTACT_LIST, uid);
         MqttHelper.publish(subscriptionTopic, msg.getPublish());
         return result;
     }

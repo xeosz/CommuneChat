@@ -3,7 +3,6 @@ package my.edu.tarc.kusm_wa14student.communechat.internal;
 import java.util.ArrayList;
 
 import my.edu.tarc.kusm_wa14student.communechat.model.Contact;
-import my.edu.tarc.kusm_wa14student.communechat.model.MqttCommand;
 
 /**
  * Created by Xeosz on 27-Sep-17.
@@ -12,6 +11,8 @@ import my.edu.tarc.kusm_wa14student.communechat.model.MqttCommand;
 public class MqttMessageHandler {
     private final static String RESERVED_STRING = "000000000000000000000000";
     //Static Variables
+    private static String REQ_AUTHENTICATION = "003801";
+    private static String ACK_AUTHENTICATION = "003802";
     private static String REQ_CONTACT_LIST = "003810";
     private static String ACK_CONTACT_LIST = "003811";
     private static String REQ_CONTACT_DETAILS = "003812";
@@ -30,13 +31,8 @@ public class MqttMessageHandler {
     //Reserved 24Bytes / 12Chars
     public MqttMessageHandler() {
     }
-
     public String getPublish() {
         return publish;
-    }
-
-    public void setPublish(String publish) {
-        this.publish = publish;
     }
 
     public String getReceived() {
@@ -52,6 +48,16 @@ public class MqttMessageHandler {
         StringBuilder sb = new StringBuilder();
         String result = null;
         switch (command) {
+            case REQ_AUTHENTICATION: {
+                String[] credential = (String[]) data;
+                sb.append(REQ_AUTHENTICATION
+                        + RESERVED_STRING
+                        + String.format("%03d", credential[0].length())
+                        + credential[0]
+                        + String.format("%03d", credential[1].length())
+                        + credential[1]);
+                break;
+            }
             case REQ_CONTACT_LIST: {
                 String uid;
                 uid = (String) data;
@@ -61,27 +67,13 @@ public class MqttMessageHandler {
                 result = sb.toString();
                 break;
             }
-            case ACK_CONTACT_LIST: {
-                String message;
-                message = (String) publish;
-                break;
-            }
             case REQ_CONTACT_DETAILS: {
-                break;
-            }
-            case ACK_CONTACT_DETAILS: {
                 break;
             }
             case REQ_USER_PROFILE: {
                 break;
             }
-            case ACK_USER_PROFILE: {
-                break;
-            }
             case REQ_SEARCH_USER: {
-                break;
-            }
-            case ACK_SEARCH_USER: {
                 break;
             }
             case KEEP_ALIVE: {
@@ -91,14 +83,31 @@ public class MqttMessageHandler {
         this.publish = result;
     }
 
-
     private void decode() {
-        String command = received.substring(0, 30);
+        String command = received.substring(0, 6);
         switch (command) {
-            case "003811" + RESERVED_STRING: {
+            case "003802": {
+                this.mqttCommand = MqttCommand.ACK_AUTHENTICATION;
+                break;
+            }
+            case "003811": {
                 this.mqttCommand = MqttCommand.ACK_CONTACT_LIST;
                 break;
             }
+            case "003813": {
+                this.mqttCommand = MqttCommand.ACK_CONTACT_DETAILS;
+                break;
+            }
+            case "003815": {
+                this.mqttCommand = MqttCommand.ACK_USER_PROFILE;
+                break;
+            }
+            case "003817": {
+                this.mqttCommand = MqttCommand.ACK_SEARCH_USER;
+                break;
+            }
+
+
             default:
                 this.mqttCommand = null;
         }
@@ -152,10 +161,25 @@ public class MqttMessageHandler {
     }
 
     public boolean isReceiving() {
-        return (this.mqttCommand == MqttCommand.ACK_CONTACT_LIST ||
+        return (this.mqttCommand == MqttCommand.ACK_AUTHENTICATION ||
+                this.mqttCommand == MqttCommand.ACK_CONTACT_LIST ||
                 this.mqttCommand == MqttCommand.ACK_SEARCH_USER ||
                 this.mqttCommand == MqttCommand.ACK_CONTACT_DETAILS ||
                 this.mqttCommand == MqttCommand.ACK_USER_PROFILE);
+    }
+
+    public enum MqttCommand {
+        REQ_AUTHENTICATION,
+        ACK_AUTHENTICATION,
+        REQ_CONTACT_LIST,
+        ACK_CONTACT_LIST,
+        REQ_CONTACT_DETAILS,
+        ACK_CONTACT_DETAILS,
+        REQ_USER_PROFILE,
+        ACK_USER_PROFILE,
+        REQ_SEARCH_USER,
+        ACK_SEARCH_USER,
+        KEEP_ALIVE;
     }
 
 }
