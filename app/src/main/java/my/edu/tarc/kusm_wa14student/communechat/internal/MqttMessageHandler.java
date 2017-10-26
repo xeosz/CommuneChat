@@ -22,6 +22,8 @@ public class MqttMessageHandler {
     private static String ACK_USER_PROFILE = "003815";
     private static String REQ_SEARCH_USER = "003816";
     private static String ACK_SEARCH_USER = "003817";
+    private static String REQ_REC_FRIENDS = "003818";
+    private static String ACK_REC_FRIENDS = "003819";
     private static String KEEP_ALIVE = "003999";
     public MqttCommand mqttCommand;
     private String publish;
@@ -79,6 +81,14 @@ public class MqttMessageHandler {
                 result = sb.toString();
                 break;
             }
+            case REQ_REC_FRIENDS: {
+                String uid = (String) data;
+                sb.append(REQ_REC_FRIENDS
+                        + RESERVED_STRING
+                        + uid);
+                result = sb.toString();
+                break;
+            }
             case KEEP_ALIVE: {
                 break;
             }
@@ -108,6 +118,10 @@ public class MqttMessageHandler {
                 }
                 case "003817": {
                     this.mqttCommand = MqttCommand.ACK_SEARCH_USER;
+                    break;
+                }
+                case "003819": {
+                    this.mqttCommand = MqttCommand.ACK_REC_FRIENDS;
                     break;
                 }
                 default:
@@ -147,6 +161,34 @@ public class MqttMessageHandler {
                 temp = Integer.parseInt(data.substring(0, 3));
                 data = data.substring(3);
                 contact.setStatus(data.substring(0, temp));
+                data = data.substring(temp);
+
+                contacts.add(contact);
+            }
+        }
+        return contacts;
+    }
+
+    public ArrayList<Contact> getRecommendedFriends() {
+        ArrayList<Contact> contacts = new ArrayList<>();
+        if (mqttCommand == MqttCommand.ACK_REC_FRIENDS) {
+            received = received.substring(30);
+            int temp;
+            String data = received;
+            while (!data.isEmpty()) {
+                Contact contact = new Contact();
+
+                contact.setUid(Integer.parseInt(data.substring(0, 10)));
+                data = data.substring(10);
+
+                temp = Integer.parseInt(data.substring(0, 3));
+                data = data.substring(3);
+                contact.setNickname(data.substring(0, temp));
+                data = data.substring(temp);
+
+                temp = Integer.parseInt(data.substring(0, 1));
+                data = data.substring(1);
+                contact.setEdges(Integer.parseInt(data.substring(0, temp)));
                 data = data.substring(temp);
 
                 contacts.add(contact);
@@ -318,7 +360,8 @@ public class MqttMessageHandler {
                 this.mqttCommand == MqttCommand.ACK_CONTACT_LIST ||
                 this.mqttCommand == MqttCommand.ACK_SEARCH_USER ||
                 this.mqttCommand == MqttCommand.ACK_CONTACT_DETAILS ||
-                this.mqttCommand == MqttCommand.ACK_USER_PROFILE);
+                this.mqttCommand == MqttCommand.ACK_USER_PROFILE ||
+                this.mqttCommand == MqttCommand.ACK_REC_FRIENDS);
     }
 
     public enum MqttCommand {
@@ -332,6 +375,8 @@ public class MqttMessageHandler {
         ACK_USER_PROFILE,
         REQ_SEARCH_USER,
         ACK_SEARCH_USER,
+        REQ_REC_FRIENDS,
+        ACK_REC_FRIENDS,
         KEEP_ALIVE;
     }
 

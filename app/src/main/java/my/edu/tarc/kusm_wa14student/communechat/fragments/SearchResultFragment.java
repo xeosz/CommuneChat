@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Editable;
@@ -42,6 +43,10 @@ import my.edu.tarc.kusm_wa14student.communechat.model.Contact;
 import my.edu.tarc.kusm_wa14student.communechat.model.User;
 
 public class SearchResultFragment extends Fragment {
+
+    private static final int SEARCH_BY_NAME = 0;
+    private static final int SEARCH_NEARBY = 2;
+    private static final int SEARCH_REC = 3;
 
     private static long TASK_TIMEOUT = 6000;
     //Views
@@ -81,6 +86,37 @@ public class SearchResultFragment extends Fragment {
                 mMessageReceiver, new IntentFilter("MessageEvent"));
         contacts = new ArrayList<>();
 
+        user = new User();
+
+        //Share preferences
+        pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        editor = pref.edit();
+
+        if (pref != null) {
+            user.setUid(pref.getInt("uid", 0));
+            user.setNickname(pref.getString("nickname", null));
+            user.setUsername(pref.getString("username", null));
+            user.setPassword(pref.getString("password", null));
+            user.setGender(pref.getInt("gender", 0));
+            user.setBirth_year(pref.getInt("birth_year", 0));
+            user.setBirth_month(pref.getInt("birth_month", 0));
+            user.setBirth_day(pref.getInt("birth_day", 0));
+            user.setEmail(pref.getString("email", null));
+            user.setPhone_number(pref.getString("phone_number", null));
+            user.setStatus(pref.getString("status", null));
+            user.setAddress(pref.getString("address", null));
+            user.setState(pref.getString("state", null));
+            user.setTown(pref.getString("town", null));
+            user.setPostal_code(pref.getString("postal_code", null));
+            user.setCountry(pref.getString("country", null));
+            user.setStudent_id(pref.getString("student_id", null));
+            user.setFaculty(pref.getString("faculty", null));
+            user.setCourse(pref.getString("course", null));
+            user.setTutorial_group(pref.getInt("tutorial_group", 0));
+            user.setIntake(pref.getString("intake", null));
+            user.setAcademic_year(pref.getInt("academic_year", 0));
+        }
+
         //Initialize Views
         ibBack = rootView.findViewById(R.id.btn_searchresult_back);
         ibSearch = rootView.findViewById(R.id.imageView_searchresult_search);
@@ -99,18 +135,24 @@ public class SearchResultFragment extends Fragment {
         if (getArguments() != null) {
             int type = getArguments().getInt("TYPE");
             switch (type) {
-                case 0: {
+                case SEARCH_BY_NAME: {
                     searchString = getArguments().getString("SEARCH_STRING");
                     tvTitle.setVisibility(View.GONE);
                     etTitle.setText(searchString);
-                    runTask(searchString);
+                    runSearchByNameTask(searchString);
+                    break;
                 }
-                break;
-                case 1: {
+
+                case SEARCH_NEARBY: {
                     container.setVisibility(View.GONE);
                     tvTitle.setText(getArguments().getString("TITLE"));
+                    break;
                 }
-                break;
+                case SEARCH_REC: {
+                    container.setVisibility(View.GONE);
+                    tvTitle.setText(getArguments().getString("TITLE"));
+                    runSearchRecommendedFriends(String.valueOf(user.getUid()));
+                }
             }
         }
 
@@ -135,7 +177,7 @@ public class SearchResultFragment extends Fragment {
                 workRunnable = new Runnable() {
                     @Override
                     public void run() {
-                        runTask(etTitle.getText().toString());
+                        runSearchByNameTask(etTitle.getText().toString());
                     }
                 };
                 handler.postDelayed(workRunnable, DELAY);
@@ -166,7 +208,7 @@ public class SearchResultFragment extends Fragment {
             public void onClick(View view) {
                 view.startAnimation(onClickAnimation);
 
-                runTask(etTitle.getText().toString());
+                runSearchByNameTask(etTitle.getText().toString());
             }
         });
 
@@ -183,8 +225,8 @@ public class SearchResultFragment extends Fragment {
     }
 
 
-    private void runTask(String string) {
-        final SearchTask task = new SearchTask(string);
+    private void runSearchByNameTask(String string) {
+        final SearchByName task = new SearchByName(string);
         task.execute();
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -202,8 +244,27 @@ public class SearchResultFragment extends Fragment {
         }, TASK_TIMEOUT);
     }
 
-    private void refreshList() {
-        adapter = new CustomAdapter(contacts, 0, getActivity());
+    private void runSearchRecommendedFriends(String uid) {
+        final SearchRecommendFriend task = new SearchRecommendFriend(uid);
+        task.execute();
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (task.getStatus() == AsyncTask.Status.RUNNING) {
+                    task.cancel(true);
+                    progressBar.setVisibility(View.GONE);
+                    getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                    tvMessage.setVisibility(View.VISIBLE);
+                    tvMessage.setText("Connection Timeout.");
+                    tvMessage.bringToFront();
+                }
+            }
+        }, TASK_TIMEOUT);
+    }
+
+    private void refreshList(int listType) {
+        adapter = new CustomAdapter(contacts, 0, getActivity(), listType);
         listViewResult.setLayoutAnimation(new LayoutAnimationController(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_in), 0.5f));
         listViewResult.setAdapter(adapter);
         adapter.notifyDataSetChanged();
@@ -211,16 +272,81 @@ public class SearchResultFragment extends Fragment {
 
     private static class ViewHolder {
         TextView tvName;
-        TextView tvStatus;
+        TextView tvBottom;
         //ImageView info;
     }
 
-    private class SearchTask extends AsyncTask<Void, Void, Integer> {
+    private class SearchRecommendFriend extends AsyncTask<Void, Void, Integer> {
+
+        private MqttMessageHandler handler = new MqttMessageHandler();
+        private String id;
+
+        private SearchRecommendFriend(String id) {
+            this.id = id;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            progressBar.setVisibility(View.VISIBLE);
+            progressBar.bringToFront();
+            tvMessage.setText("");
+            tvMessage.setVisibility(View.INVISIBLE);
+            getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            handler.encode(MqttMessageHandler.MqttCommand.REQ_REC_FRIENDS, this.id);
+            MqttHelper.publish(uniqueTopic, handler.getPublish());
+            contacts.clear();
+            refreshList(SEARCH_REC);
+        }
+
+        @Override
+        protected Integer doInBackground(Void... voids) {
+            int result = 0;
+            if (!isCancelled()) {
+                try {
+                    Thread.sleep(2000);
+                    if (!message.isEmpty()) {
+                        handler.setReceived(message);
+                        message = "";
+                        if (handler.mqttCommand == MqttMessageHandler.MqttCommand.ACK_REC_FRIENDS) {
+                            contacts = handler.getRecommendedFriends();
+                            if (contacts.size() > 0) {
+                                return 1;
+                            } else
+                                return 0;
+                        }
+                    } else {
+                        this.doInBackground();
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            return result;
+        }
+
+        @Override
+        protected void onPostExecute(Integer integer) {
+            super.onPostExecute(integer);
+            progressBar.setVisibility(View.GONE);
+            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            if (integer == 0) {
+                tvMessage.setText("No similar friends");
+                tvMessage.setVisibility(View.VISIBLE);
+                tvMessage.bringToFront();
+            } else if (integer == 1) {
+                refreshList(SEARCH_REC);
+            }
+        }
+    }
+
+    private class SearchByName extends AsyncTask<Void, Void, Integer> {
 
         private MqttMessageHandler handler = new MqttMessageHandler();
         private String searchString;
 
-        private SearchTask(String search) {
+        private SearchByName(String search) {
             this.searchString = search;
         }
 
@@ -234,10 +360,9 @@ public class SearchResultFragment extends Fragment {
             getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                     WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             handler.encode(MqttMessageHandler.MqttCommand.REQ_SEARCH_USER, searchString);
-            MqttHelper.subscribe(uniqueTopic);
             MqttHelper.publish(uniqueTopic, handler.getPublish());
             contacts.clear();
-            refreshList();
+            refreshList(SEARCH_BY_NAME);
         }
 
         @Override
@@ -276,17 +401,19 @@ public class SearchResultFragment extends Fragment {
                 tvMessage.setVisibility(View.VISIBLE);
                 tvMessage.bringToFront();
             } else if (integer == 1) {
-                refreshList();
+                refreshList(SEARCH_BY_NAME);
             }
         }
     }
 
-    public class CustomAdapter extends ArrayAdapter<Contact> {
-        Context mContext;
+    private class CustomAdapter extends ArrayAdapter<Contact> {
+        int listType;
+        private Context mContext;
 
-        public CustomAdapter(ArrayList<Contact> contacts, int resources, Context context) {
+        public CustomAdapter(ArrayList<Contact> contacts, int resources, Context context, int listType) {
             super(context, resources, contacts);
             this.mContext = context;
+            this.listType = listType;
         }
 
         @Override
@@ -297,16 +424,31 @@ public class SearchResultFragment extends Fragment {
             if (convertView == null) {
                 viewHolder = new ViewHolder();
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.contact_frame, parent, false);
-                viewHolder.tvName = (TextView) convertView.findViewById(R.id.contact_frame_name);
-                viewHolder.tvStatus = (TextView) convertView.findViewById(R.id.contact_frame_bottomlayer);
+                viewHolder.tvName = convertView.findViewById(R.id.contact_frame_name);
+                viewHolder.tvBottom = convertView.findViewById(R.id.contact_frame_bottomlayer);
                 convertView.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) convertView.getTag();
             }
 
-            viewHolder.tvName.setText(contact.getNickname());
-            viewHolder.tvStatus.setText(contact.getStatus());
-
+            switch (listType) {
+                case SEARCH_BY_NAME: {
+                    viewHolder.tvName.setText(contact.getNickname());
+                    viewHolder.tvBottom.setText(contact.getStatus());
+                    break;
+                }
+                case SEARCH_NEARBY: {
+                    break;
+                }
+                case SEARCH_REC: {
+                    viewHolder.tvName.setText(contact.getNickname());
+                    viewHolder.tvBottom.setText(contact.getEdges() + " mutual friend(s).");
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
             return convertView;
         }
     }

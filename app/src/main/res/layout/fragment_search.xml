@@ -60,7 +60,7 @@
             android:textColor="@android:color/white" />
 
         <Button
-            android:id="@+id/btn_search_recommendation"
+            android:id="@+id/btn_search_nearby"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="match_parent"
             android:layout_height="@dimen/item_height"
@@ -72,11 +72,11 @@
             android:textColor="@android:color/white" />
 
         <Button
-            android:id="@+id/btn_search_nearby"
+            android:id="@+id/btn_search_recommendation"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="match_parent"
             android:layout_height="@dimen/item_height"
-            android:layout_below="@+id/btn_search_recommendation"
+            android:layout_below="@+id/btn_search_nearby"
             android:layout_marginTop="@dimen/small_margin"
             android:background="@color/colorCombination3"
             android:text="@string/search_recommend"
@@ -88,7 +88,7 @@
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="match_parent"
             android:layout_height="@dimen/item_height"
-            android:layout_below="@+id/btn_search_nearby"
+            android:layout_below="@+id/btn_search_recommendation"
             android:layout_marginTop="@dimen/small_margin"
             android:background="@color/colorCombination4"
             android:text="@string/search_localchat"

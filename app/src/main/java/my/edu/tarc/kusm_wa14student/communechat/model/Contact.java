@@ -19,6 +19,8 @@ public class Contact {
     private String phone_number;
     private float latitude;
     private float longitude;
+
+    private int edges;
     private byte[] image;
 
     public Contact() {
@@ -114,6 +116,14 @@ public class Contact {
 
     public void setImage(byte[] image) {
         this.image = image;
+    }
+
+    public int getEdges() {
+        return edges;
+    }
+
+    public void setEdges(int edges) {
+        this.edges = edges;
     }
 
     private class DbBitmapUtility {

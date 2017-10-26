@@ -35,6 +35,7 @@ public final class MqttHelper {
     private static boolean retain = false;
 
     private static String generateClientId() {
+        //TODO: new id
         String result;
         //result = "android/"+UUID.randomUUID();
         result = "100";
