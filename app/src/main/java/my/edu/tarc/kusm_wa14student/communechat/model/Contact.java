@@ -17,12 +17,13 @@ public class Contact {
     private String status;
     private int last_online;
     private String phone_number;
+    private float latitude;
+    private float longitude;
     private byte[] image;
 
     public Contact() {
 
     }
-
     //Constructor w/o image
     public Contact(int uid, String username, String nickname, int gender, String status, int last_online, String phone_number) {
         this.uid = uid;
@@ -89,6 +90,22 @@ public class Contact {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public float getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(float latitude) {
+        this.latitude = latitude;
+    }
+
+    public float getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(float longitude) {
+        this.longitude = longitude;
     }
 
     public byte[] getImage() {

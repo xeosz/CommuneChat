@@ -1,13 +1,167 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="my.edu.tarc.kusm_wa14student.communechat.fragments.UserFragment">
+    android:layout_height="match_parent">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="" />
+        android:layout_height="match_parent">
 
-</FrameLayout>
+        <ImageView
+            android:id="@+id/header_cover_image"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:scaleType="centerCrop"
+            android:src="@drawable/profile_header_image" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp">
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <my.edu.tarc.kusm_wa14student.communechat.components.CircleImageView
+                    android:id="@+id/user_profile_photo"
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:layout_gravity="center"
+                    android:elevation="5dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_person"
+                    app:civ_fill_color="@android:color/background_light" />
+            </FrameLayout>
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/textView_userfrag_nickname"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="40dp"
+                    android:gravity="center_vertical|left"
+                    android:textColor="#fff"
+                    android:textSize="@dimen/medium_text"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/imageView_userfrag_gender"
+                    android:layout_width="20pt"
+                    android:layout_height="20pt"
+                    android:layout_above="@+id/textView_userfrag_username"
+                    android:layout_alignTop="@+id/textView_userfrag_nickname"
+                    android:layout_toRightOf="@+id/textView_userfrag_nickname"
+                    android:gravity="center_vertical"
+                    android:paddingLeft="@dimen/gender_icon_padding"
+                    android:paddingRight="@dimen/gender_icon_padding" />
+
+
+                <TextView
+                    android:id="@+id/textView_userfrag_username"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@+id/textView_userfrag_nickname"
+                    android:layout_below="@+id/textView_userfrag_nickname"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center_vertical|left"
+                    android:textColor="#fff"
+                    android:textSize="@dimen/small_text" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignLeft="@+id/textView_userfrag_nickname"
+                    android:layout_below="@+id/textView_userfrag_username"
+                    android:layout_marginTop="@dimen/activity_vertical_margin"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="@dimen/profile_button_size"
+                        android:layout_height="@dimen/profile_button_size"
+                        android:background="@drawable/round_button"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_person"
+                        android:tint="@android:color/white" />
+
+                    <TextView
+                        android:id="@+id/textView_userfrag_number_of_friends"
+                        android:layout_width="wrap_content"
+                        android:layout_height="@dimen/profile_button_size"
+                        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+                        android:foregroundGravity="top"
+                        android:textColor="@android:color/white"
+                        android:textSize="16sp"
+                        android:tint="@android:color/white" />
+
+                </LinearLayout>
+            </RelativeLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/header_cover_image"
+            android:layout_marginTop="5dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/textView_userfrag_status_frame"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:background="#fff"
+                android:clickable="true"
+                android:minHeight="?android:attr/listPreferredItemHeight"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="2"
+                    android:gravity="center_vertical"
+                    android:paddingLeft="@dimen/activity_horizontal_margin"
+                    android:paddingRight="@dimen/activity_horizontal_margin"
+                    android:text="@string/status"
+                    android:textSize="@dimen/small_title"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textView_userfrag_status_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="3"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="@dimen/small_margin"
+                    android:paddingLeft="@dimen/activity_horizontal_margin"
+                    android:paddingRight="@dimen/activity_horizontal_margin"
+                    android:paddingTop="@dimen/small_margin"
+                    android:text="Reserved template"
+                    android:textSize="@dimen/small_text" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/textView_userfrag_logout"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:background="#fff"
+                android:clickable="true"
+                android:padding="20dp"
+                android:text="@string/logout"
+                android:textSize="@dimen/small_text" />
+
+
+        </LinearLayout>
+    </RelativeLayout>
+</ScrollView>

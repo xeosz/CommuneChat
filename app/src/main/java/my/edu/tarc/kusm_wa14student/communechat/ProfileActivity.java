@@ -8,6 +8,8 @@ import android.os.Bundle;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -61,8 +63,11 @@ public class ProfileActivity extends AppCompatActivity {
         ibMessage = (ImageButton) findViewById(R.id.imageButton_profile_message);
         ibSettings = (ImageButton) findViewById(R.id.imageButton_profile_setting);
 
+        final Animation onClickAnimation = new AlphaAnimation(0.3f, 1.0f);
+        onClickAnimation.setDuration(1000);
+
         tvNickname.setText(contact.getNickname());
-        tvUsername.setText("Username: " + contact.getUsername());
+        tvUsername.setText("ID: " + contact.getUsername());
 
         if (contact.getGender() == 0) {
             ivGender.setImageDrawable(getResources().getDrawable(R.drawable.ic_boys));
@@ -74,6 +79,7 @@ public class ProfileActivity extends AppCompatActivity {
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                view.setAnimation(onClickAnimation);
                 onBackPressed();
             }
         });
@@ -81,7 +87,7 @@ public class ProfileActivity extends AppCompatActivity {
         ibMessage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                view.setAnimation(onClickAnimation);
             }
         });
 

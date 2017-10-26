@@ -1,7 +1,5 @@
 package my.edu.tarc.kusm_wa14student.communechat.model;
 
-import java.util.Date;
-
 /**
  * Created by Xeosz on 26-Sep-17.
  */
@@ -33,6 +31,39 @@ public class User {
     private int tutorial_group;
     private int last_online;
     private String status;
+
+    public User() {
+
+    }
+
+    public User(int uid, String username, String nickname, String password, int gender, int nric, String phone_number, String email, String address, String state, String postal_code, String town, String country, int birth_year, int birth_month, int birth_day, float latitude, float longitude, String student_id, String faculty, String course, int academic_year, String intake, int tutorial_group, int last_online, String status) {
+        this.uid = uid;
+        this.username = username;
+        this.nickname = nickname;
+        this.password = password;
+        this.gender = gender;
+        this.nric = nric;
+        this.phone_number = phone_number;
+        this.email = email;
+        this.address = address;
+        this.state = state;
+        this.postal_code = postal_code;
+        this.town = town;
+        this.country = country;
+        this.birth_year = birth_year;
+        this.birth_month = birth_month;
+        this.birth_day = birth_day;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.student_id = student_id;
+        this.faculty = faculty;
+        this.course = course;
+        this.academic_year = academic_year;
+        this.intake = intake;
+        this.tutorial_group = tutorial_group;
+        this.last_online = last_online;
+        this.status = status;
+    }
 
     public int getUid() {
         return uid;
@@ -239,40 +270,6 @@ public class User {
     }
 
     public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public User() {
-
-    }
-
-    public User(int uid, String username, String nickname, String password, int gender, int nric, String phone_number, String email, String address, String state, String postal_code, String town, String country, int birth_year, int birth_month, int birth_day, float latitude, float longitude, String student_id, String faculty, String course, int academic_year, String intake, int tutorial_group, int last_online, String status) {
-        this.uid = uid;
-        this.username = username;
-        this.nickname = nickname;
-        this.password = password;
-        this.gender = gender;
-        this.nric = nric;
-        this.phone_number = phone_number;
-        this.email = email;
-        this.address = address;
-        this.state = state;
-        this.postal_code = postal_code;
-        this.town = town;
-        this.country = country;
-        this.birth_year = birth_year;
-        this.birth_month = birth_month;
-        this.birth_day = birth_day;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.student_id = student_id;
-        this.faculty = faculty;
-        this.course = course;
-        this.academic_year = academic_year;
-        this.intake = intake;
-        this.tutorial_group = tutorial_group;
-        this.last_online = last_online;
-
         this.status = status;
     }
 

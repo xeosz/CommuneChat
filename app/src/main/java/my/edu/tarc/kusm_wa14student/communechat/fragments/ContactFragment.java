@@ -4,9 +4,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.database.DataSetObserver;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
@@ -15,6 +18,7 @@ import android.view.ViewGroup;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -29,19 +33,27 @@ import my.edu.tarc.kusm_wa14student.communechat.internal.ContactDBHandler;
 import my.edu.tarc.kusm_wa14student.communechat.internal.MqttHelper;
 import my.edu.tarc.kusm_wa14student.communechat.internal.MqttMessageHandler;
 import my.edu.tarc.kusm_wa14student.communechat.model.Contact;
+import my.edu.tarc.kusm_wa14student.communechat.model.User;
 
 public class ContactFragment extends Fragment {
     //MQTTClient configuration
     final private String subscriptionTopic = "sensor/test";
     UpdateListTask task = new UpdateListTask();
     private String TAG = "ContactFragment";
+
     //ListViewAdapter variables
     private ArrayList<Contact> contacts = new ArrayList<>();
     private CustomAdapter adapter;
+
     //Fragment Views
     private ListView contactListView;
     private TextView tvMain;
     private ProgressBar progressBar;
+
+    //var
+    private User user;
+    private SharedPreferences pref;
+    private SharedPreferences.Editor editor;
     private ContactDBHandler db;
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -72,21 +84,41 @@ public class ContactFragment extends Fragment {
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         final View rootView = inflater.inflate(R.layout.fragment_contact, container, false);
+
+        contacts = new ArrayList<>();
+        user = new User();
+
+        //Share preferences
+        pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        editor = pref.edit();
+        if (pref != null) {
+            user.setUid(pref.getInt("uid", 0));
+        }
+
+        //Listen to message
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 mMessageReceiver, new IntentFilter("MessageEvent"));
 
         // Inflate the layout for this fragment
-        contacts = new ArrayList<>();
 
         tvMain = rootView.findViewById(R.id.tv_contact_fragment);
         contactListView = rootView.findViewById(R.id.listView_contact);
         progressBar = rootView.findViewById(R.id.progressBar_contact_fragment);
         progressBar.setVisibility(View.INVISIBLE);
         adapter = new CustomAdapter(contacts, 0, getActivity());
+        contactListView.setLayoutAnimation(new LayoutAnimationController(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_in), 0.3f));
         contactListView.setAdapter(adapter);
+
+        final Animation onClickAnimation = new AlphaAnimation(0.3f, 1.0f);
+        onClickAnimation.setDuration(1000);
 
         db = new ContactDBHandler(getContext());
 
@@ -110,20 +142,20 @@ public class ContactFragment extends Fragment {
                 getActivity().startActivity(intent);
 
                 //OnClick Animation
-                Animation onClickAnimation = new AlphaAnimation(0.3f, 1.0f);
-                onClickAnimation.setDuration(2000);
                 view.startAnimation(onClickAnimation);
             }
         });
-
         getContactList();
-
-        //TODO: temp function change if login implemented
-        requestContactData("1000000000");
+        requestContactData(String.valueOf(user.getUid()));
 
         //Check list contents
         checkContent(contacts, rootView);
         return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
     private void getContactList() {
@@ -134,7 +166,7 @@ public class ContactFragment extends Fragment {
         adapter.notifyDataSetChanged();
     }
 
-    public void checkContent(ArrayList contacts, View rootView) {
+    private void checkContent(ArrayList contacts, View rootView) {
         if (!contacts.isEmpty()) {
             tvMain.setVisibility(View.INVISIBLE);
         } else {
@@ -175,8 +207,6 @@ public class ContactFragment extends Fragment {
                 handler.setReceived(strings[0]);
                 if (handler.mqttCommand != null) {
                     switch (handler.mqttCommand) {
-                        case REQ_CONTACT_LIST:
-                            break;
                         case ACK_CONTACT_LIST: {
                             db.clearTable();
 
@@ -185,20 +215,7 @@ public class ContactFragment extends Fragment {
                                 db.addContact(temp);
                             break;
                         }
-                        case REQ_CONTACT_DETAILS:
-                            break;
-                        case ACK_CONTACT_DETAILS:
-                            break;
-                        case REQ_USER_PROFILE:
-                            break;
-                        case ACK_USER_PROFILE:
-                            break;
-                        case REQ_SEARCH_USER:
-                            break;
-                        case ACK_SEARCH_USER:
-                            break;
-                        case KEEP_ALIVE:
-                            break;
+
                     }
                 }
             }
@@ -214,9 +231,7 @@ public class ContactFragment extends Fragment {
         }
     }
 
-    public class CustomAdapter extends ArrayAdapter<Contact> {
-        int lastPosition = -1;
-
+    private class CustomAdapter extends ArrayAdapter<Contact> {
         Context mContext;
 
         public CustomAdapter(ArrayList<Contact> contacts, int resources, Context context) {
@@ -228,23 +243,16 @@ public class ContactFragment extends Fragment {
         public View getView(int position, View convertView, ViewGroup parent) {
             ViewHolder viewHolder;
             Contact contact = getItem(position);
-            final View result;
             // Check if an existing view is being reused, otherwise inflate the view
             if (convertView == null) {
                 viewHolder = new ViewHolder();
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.contact_frame, parent, false);
                 viewHolder.tvName = (TextView) convertView.findViewById(R.id.contact_frame_name);
-                viewHolder.tvStatus = (TextView) convertView.findViewById(R.id.contact_frame_status);
-                result = convertView;
+                viewHolder.tvStatus = (TextView) convertView.findViewById(R.id.contact_frame_bottomlayer);
                 convertView.setTag(viewHolder);
             } else {
                 viewHolder = (ViewHolder) convertView.getTag();
-                result = convertView;
             }
-
-            Animation animation = AnimationUtils.loadAnimation(mContext, (position > lastPosition) ? R.anim.up_from_bottom : R.anim.down_from_top);
-            result.startAnimation(animation);
-            lastPosition = position;
 
             viewHolder.tvName.setText(contact.getNickname());
             viewHolder.tvStatus.setText(contact.getStatus());

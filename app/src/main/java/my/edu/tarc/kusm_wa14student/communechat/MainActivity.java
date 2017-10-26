@@ -2,11 +2,15 @@ package my.edu.tarc.kusm_wa14student.communechat;
 
 import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.internal.BottomNavigationItemView;
 import android.support.design.internal.BottomNavigationMenuView;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -18,6 +22,7 @@ import my.edu.tarc.kusm_wa14student.communechat.adapter.ViewPagerAdapter;
 import my.edu.tarc.kusm_wa14student.communechat.fragments.ChatFragment;
 import my.edu.tarc.kusm_wa14student.communechat.fragments.ContactFragment;
 import my.edu.tarc.kusm_wa14student.communechat.fragments.SearchFragment;
+import my.edu.tarc.kusm_wa14student.communechat.fragments.SearchResultFragment;
 import my.edu.tarc.kusm_wa14student.communechat.fragments.UserFragment;
 import my.edu.tarc.kusm_wa14student.communechat.internal.MessageService;
 import my.edu.tarc.kusm_wa14student.communechat.internal.MqttHelper;
@@ -41,6 +46,9 @@ public class MainActivity extends AppCompatActivity {
     private ChatFragment chatFragment;
 
     private BroadcastReceiver mMessageReceiver;
+    private SharedPreferences pref;
+    private SharedPreferences.Editor editor;
+
 
     //Static Mqtt Connection Variables
     private MqttHelper mqttHelper;
@@ -55,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        pref = PreferenceManager.getDefaultSharedPreferences(this);
 
         //Start service
         startService(new Intent(MainActivity.this, MessageService.class));
@@ -132,6 +141,17 @@ public class MainActivity extends AppCompatActivity {
         });
 
         viewPager.setAdapter(adapter);
+    }
+
+    @Override
+    public void onBackPressed() {
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag("search_result_fragment");
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        if (fragment != null && fragment instanceof SearchResultFragment) {
+            ft.setCustomAnimations(R.anim.slide_up, R.anim.slide_left, R.anim.slide_up, R.anim.slide_left);
+            ft.remove(fragment).commit();
+        } else
+            super.onBackPressed();
     }
 
     static class BottomNavigationViewHelper {

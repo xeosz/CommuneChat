@@ -25,18 +25,26 @@
                 android:id="@+id/editText_login"
                 android:layout_width="match_parent"
                 android:layout_height="?android:listPreferredItemHeight"
-                android:hint="@string/prompt_username" />
+                android:hint="@string/prompt_username"
+                android:imeOptions="actionNext"
+                android:maxLength="26"
+                android:singleLine="true" />
 
             <EditText
                 android:id="@+id/editText_password"
                 android:layout_width="match_parent"
                 android:layout_height="?android:listPreferredItemHeight"
-                android:hint="@string/prompt_password" />
+                android:hint="@string/prompt_password"
+                android:imeOptions="actionGo"
+                android:inputType="textPassword"
+                android:maxLength="26"
+                android:singleLine="true" />
 
             <Button
                 android:id="@+id/button_login"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:imeOptions="actionGo"
                 android:text="@string/action_sign_in" />
 
         </LinearLayout>

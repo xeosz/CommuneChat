@@ -90,7 +90,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/textView_user_profile_nickname"
+                android:layout_below="@+id/textView_user_profile_username"
                 android:layout_marginTop="@dimen/activity_vertical_margin"
                 android:gravity="center"
                 android:orientation="horizontal">
@@ -131,31 +131,47 @@
         </RelativeLayout>
 
         <LinearLayout
+            style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/profile_layout"
             android:layout_marginTop="5dp"
             android:orientation="vertical">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="5dp"
+                android:layout_marginBottom="5dp"
                 android:background="#fff"
                 android:clickable="true"
-                android:elevation="4dp"
-                android:padding="20dp"
-                android:text="Reserved template" />
+                android:minHeight="?android:attr/listPreferredItemHeight"
+                android:orientation="vertical">
 
-            <TextView
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="5dp"
-                android:background="#fff"
-                android:clickable="true"
-                android:elevation="4dp"
-                android:padding="20dp"
-                android:text="Reserved template" />
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="2"
+                    android:gravity="center_vertical"
+                    android:paddingLeft="@dimen/activity_horizontal_margin"
+                    android:paddingRight="@dimen/activity_horizontal_margin"
+                    android:text="@string/status"
+                    android:textSize="@dimen/small_title"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textView_user_profile_status"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="3"
+                    android:gravity="center_vertical"
+                    android:paddingBottom="@dimen/small_margin"
+                    android:paddingLeft="@dimen/activity_horizontal_margin"
+                    android:paddingRight="@dimen/activity_horizontal_margin"
+                    android:paddingTop="@dimen/small_margin"
+                    android:text="Reserved template"
+                    android:textSize="@dimen/small_text" />
+
+            </LinearLayout>
 
 
         </LinearLayout>
