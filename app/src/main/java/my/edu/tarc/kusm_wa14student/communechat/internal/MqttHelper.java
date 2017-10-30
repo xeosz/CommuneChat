@@ -12,6 +12,9 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+import java.util.Date;
+import java.util.UUID;
+
 import static org.eclipse.paho.client.mqttv3.MqttConnectOptions.KEEP_ALIVE_INTERVAL_DEFAULT;
 
 /**
@@ -19,44 +22,65 @@ import static org.eclipse.paho.client.mqttv3.MqttConnectOptions.KEEP_ALIVE_INTER
  */
 
 public final class MqttHelper {
-
     private static final String TAG = "MQTTHelper";
-    public static MqttAndroidClient mqttAndroidClient;
-    public static String defaultTopic = "sensor/test";
+    private static MqttAndroidClient mqttAndroidClient;
     private static MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
     private static DisconnectedBufferOptions disconnectedBufferOptions = new DisconnectedBufferOptions();
 
     //Static MQTT Connection Variables
+    private static String userTopic;
     private static String clientId;
+    private static String topicFormat = "/";
     private static String serverUri = "tcp://m11.cloudmqtt.com:17391";
     private static String mqttUsername = "ehvfrtgx";
     private static String mqttPassword = "YPcMC08pYYpr";
     private static int QoS = 1;
     private static boolean retain = false;
+    private static boolean cleanSession = false;
+    private static boolean automaticReconnect = true;
 
-    private static String generateClientId() {
-        //TODO: new id
+    private static String generateRandomClientId() {
         String result;
-        //result = "android/"+UUID.randomUUID();
-        result = "100";
+        result = UUID.randomUUID().toString().substring(0, 8) + "-" + (new Date().getTime() / 1000);
         return result;
     }
 
     public static void startMqtt(Context context) {
-        clientId = generateClientId();
+        clientId = generateRandomClientId();
         mqttAndroidClient = new MqttAndroidClient(context, serverUri, clientId);
+        try {
+            connect();
+            Log.i("[MQTTHELPER]before", mqttAndroidClient.getClientId());
+        } catch (MqttException e) {
+            e.printStackTrace();
+            Log.i("[MQTTHELPER]before", "fail");
+        }
+    }
+
+    public static void startMqtt(Context context, String Id) {
+        userTopic = getUserTopic(Id);
+        clientId = Id;
+        mqttAndroidClient = new MqttAndroidClient(context, serverUri, Id);
+        try {
+            connect();
+            Log.i("after login", mqttAndroidClient.getClientId());
+        } catch (MqttException e) {
+            e.printStackTrace();
+            Log.i("[MQTTHELPER]after", "fail");
+        }
+    }
+
+    public static String getUserTopic() {
+        return userTopic;
+    }
+
+    public static String getUserTopic(String uid) {
+        userTopic = topicFormat + uid;
+        return userTopic;
     }
 
     public static void setCallback(MqttCallbackExtended callback) {
         mqttAndroidClient.setCallback(callback);
-    }
-
-    public static void setConnectionOptions(String username, String password) {
-        mqttConnectOptions.setAutomaticReconnect(true);
-        mqttConnectOptions.setCleanSession(false);
-        mqttConnectOptions.setUserName(username);
-        mqttConnectOptions.setPassword(password.toCharArray());
-        mqttConnectOptions.setKeepAliveInterval(KEEP_ALIVE_INTERVAL_DEFAULT);
     }
 
     private static void setDisconnectBufferOption() {
@@ -68,7 +92,11 @@ public final class MqttHelper {
     }
 
     private static IMqttToken connect() throws MqttException {
-        setConnectionOptions(mqttUsername, mqttPassword);
+        mqttConnectOptions.setAutomaticReconnect(automaticReconnect);
+        mqttConnectOptions.setCleanSession(cleanSession);
+        mqttConnectOptions.setUserName(mqttUsername);
+        mqttConnectOptions.setPassword(mqttPassword.toCharArray());
+        mqttConnectOptions.setKeepAliveInterval(KEEP_ALIVE_INTERVAL_DEFAULT);
         return mqttAndroidClient.connect(mqttConnectOptions);
     }
 
@@ -83,6 +111,7 @@ public final class MqttHelper {
                         setDisconnectBufferOption();
                         try {
                             mqttAndroidClient.subscribe(subscriptionTopic, QoS);
+                            Log.i(TAG, "Subscribed to " + subscriptionTopic);
                         } catch (MqttException e) {
                             Log.w(TAG, "Failed to subscribe to topic: " + subscriptionTopic + ".");
                             e.printStackTrace();
@@ -200,21 +229,23 @@ public final class MqttHelper {
     }
 
     public static void disconnect() {
-        try {
-            IMqttToken token = mqttAndroidClient.disconnect();
-            token.setActionCallback(new IMqttActionListener() {
-                @Override
-                public void onSuccess(IMqttToken asyncActionToken) {
-                    Log.i(TAG, "Disconnected to the server " + serverUri);
-                }
+        if (mqttAndroidClient.isConnected()) {
+            try {
+                IMqttToken token = mqttAndroidClient.disconnect();
+                token.setActionCallback(new IMqttActionListener() {
+                    @Override
+                    public void onSuccess(IMqttToken asyncActionToken) {
+                        Log.i(TAG, "Disconnected to the server " + serverUri);
+                    }
 
-                @Override
-                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                    @Override
+                    public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
 
-                }
-            });
-        } catch (MqttException e) {
-            e.printStackTrace();
+                    }
+                });
+            } catch (MqttException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

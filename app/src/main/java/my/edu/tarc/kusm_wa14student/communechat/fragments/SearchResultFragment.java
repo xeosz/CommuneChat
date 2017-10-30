@@ -29,7 +29,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -62,8 +61,8 @@ public class SearchResultFragment extends Fragment {
     private SharedPreferences.Editor editor;
     private ArrayList<Contact> contacts;
     private CustomAdapter adapter;
+
     private String message = "";
-    private LinearLayout container;
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -85,36 +84,14 @@ public class SearchResultFragment extends Fragment {
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 mMessageReceiver, new IntentFilter("MessageEvent"));
         contacts = new ArrayList<>();
-
         user = new User();
 
         //Share preferences
-        pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        pref = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
         editor = pref.edit();
 
         if (pref != null) {
             user.setUid(pref.getInt("uid", 0));
-            user.setNickname(pref.getString("nickname", null));
-            user.setUsername(pref.getString("username", null));
-            user.setPassword(pref.getString("password", null));
-            user.setGender(pref.getInt("gender", 0));
-            user.setBirth_year(pref.getInt("birth_year", 0));
-            user.setBirth_month(pref.getInt("birth_month", 0));
-            user.setBirth_day(pref.getInt("birth_day", 0));
-            user.setEmail(pref.getString("email", null));
-            user.setPhone_number(pref.getString("phone_number", null));
-            user.setStatus(pref.getString("status", null));
-            user.setAddress(pref.getString("address", null));
-            user.setState(pref.getString("state", null));
-            user.setTown(pref.getString("town", null));
-            user.setPostal_code(pref.getString("postal_code", null));
-            user.setCountry(pref.getString("country", null));
-            user.setStudent_id(pref.getString("student_id", null));
-            user.setFaculty(pref.getString("faculty", null));
-            user.setCourse(pref.getString("course", null));
-            user.setTutorial_group(pref.getInt("tutorial_group", 0));
-            user.setIntake(pref.getString("intake", null));
-            user.setAcademic_year(pref.getInt("academic_year", 0));
         }
 
         //Initialize Views
@@ -294,8 +271,8 @@ public class SearchResultFragment extends Fragment {
             tvMessage.setVisibility(View.INVISIBLE);
             getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                     WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-            handler.encode(MqttMessageHandler.MqttCommand.REQ_REC_FRIENDS, this.id);
-            MqttHelper.publish(uniqueTopic, handler.getPublish());
+            handler.encode(MqttMessageHandler.MqttCommand.REQ_RECOMMEND_FRIENDS, this.id);
+            MqttHelper.publish(MqttHelper.getUserTopic(), handler.getPublish());
             contacts.clear();
             refreshList(SEARCH_REC);
         }
@@ -309,7 +286,7 @@ public class SearchResultFragment extends Fragment {
                     if (!message.isEmpty()) {
                         handler.setReceived(message);
                         message = "";
-                        if (handler.mqttCommand == MqttMessageHandler.MqttCommand.ACK_REC_FRIENDS) {
+                        if (handler.mqttCommand == MqttMessageHandler.MqttCommand.REQ_RECOMMEND_FRIENDS) {
                             contacts = handler.getRecommendedFriends();
                             if (contacts.size() > 0) {
                                 return 1;
@@ -360,7 +337,7 @@ public class SearchResultFragment extends Fragment {
             getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                     WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             handler.encode(MqttMessageHandler.MqttCommand.REQ_SEARCH_USER, searchString);
-            MqttHelper.publish(uniqueTopic, handler.getPublish());
+            MqttHelper.publish(MqttHelper.getUserTopic(), handler.getPublish());
             contacts.clear();
             refreshList(SEARCH_BY_NAME);
         }

@@ -1,14 +1,17 @@
 package my.edu.tarc.kusm_wa14student.communechat;
 
-import android.content.BroadcastReceiver;
+import android.Manifest;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.design.internal.BottomNavigationItemView;
 import android.support.design.internal.BottomNavigationMenuView;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
@@ -17,18 +20,24 @@ import android.util.Log;
 import android.view.MenuItem;
 
 import java.lang.reflect.Field;
+import java.text.DecimalFormat;
+import java.util.Date;
 
 import my.edu.tarc.kusm_wa14student.communechat.adapter.ViewPagerAdapter;
-import my.edu.tarc.kusm_wa14student.communechat.fragments.ChatFragment;
-import my.edu.tarc.kusm_wa14student.communechat.fragments.ContactFragment;
-import my.edu.tarc.kusm_wa14student.communechat.fragments.SearchFragment;
+import my.edu.tarc.kusm_wa14student.communechat.fragments.ChatTabFragment;
+import my.edu.tarc.kusm_wa14student.communechat.fragments.ContactTabFragment;
 import my.edu.tarc.kusm_wa14student.communechat.fragments.SearchResultFragment;
-import my.edu.tarc.kusm_wa14student.communechat.fragments.UserFragment;
+import my.edu.tarc.kusm_wa14student.communechat.fragments.SearchTabFragment;
+import my.edu.tarc.kusm_wa14student.communechat.fragments.UserTabFragment;
+import my.edu.tarc.kusm_wa14student.communechat.internal.GPSTracker;
 import my.edu.tarc.kusm_wa14student.communechat.internal.MessageService;
 import my.edu.tarc.kusm_wa14student.communechat.internal.MqttHelper;
+import my.edu.tarc.kusm_wa14student.communechat.internal.MqttMessageHandler;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
+    private static final int LOCATION_REQUEST_CODE = 1;
+    private static final long KEEPALIVE_INTERVAL = 30000; //ms
 
     //CustomViewPagerAdapter Variables;
     private ViewPagerAdapter adapter;
@@ -40,48 +49,46 @@ public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavView;
 
     //Viewpager's Fragments
-    private ContactFragment contactFragment;
-    private SearchFragment searchFragment;
-    private UserFragment userFragment;
-    private ChatFragment chatFragment;
+    private ContactTabFragment contactTabFragment;
+    private SearchTabFragment searchTabFragment;
+    private UserTabFragment userTabFragment;
+    private ChatTabFragment chatTabFragment;
 
-    private BroadcastReceiver mMessageReceiver;
+    //Vars
     private SharedPreferences pref;
-    private SharedPreferences.Editor editor;
-
-
-    //Static Mqtt Connection Variables
-    private MqttHelper mqttHelper;
-    private String clientId = "1000000000";
-    private String serverUri = "tcp://m11.cloudmqtt.com:17391";
-    private String mqttUsername = "ehvfrtgx";
-    private String mqttPassword = "YPcMC08pYYpr";
-    private String clientTopic = "sensor/test";
-    private int QoS = 1;
+    private GPSTracker gps;
+    private DecimalFormat df = new DecimalFormat("#.000000");
+    private Handler keepAliveHandler;
+    private Runnable keepAliveTask = new Runnable() {
+        @Override
+        public void run() {
+            updateLocation();
+            keepAliveHandler.postDelayed(this, KEEPALIVE_INTERVAL);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        pref = PreferenceManager.getDefaultSharedPreferences(this);
 
         //Start service
         startService(new Intent(MainActivity.this, MessageService.class));
+        pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         //Initialize views
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         bottomNavView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
         adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        contactFragment = new ContactFragment();
-        chatFragment = new ChatFragment();
-        searchFragment = new SearchFragment();
-        userFragment = new UserFragment();
+        contactTabFragment = new ContactTabFragment();
+        chatTabFragment = new ChatTabFragment();
+        searchTabFragment = new SearchTabFragment();
+        userTabFragment = new UserTabFragment();
 
-        adapter.addFragment(contactFragment);
-        adapter.addFragment(chatFragment);
-        adapter.addFragment(searchFragment);
-        adapter.addFragment(userFragment);
-
+        adapter.addFragment(contactTabFragment);
+        adapter.addFragment(chatTabFragment);
+        adapter.addFragment(searchTabFragment);
+        adapter.addFragment(userTabFragment);
 
         BottomNavigationViewHelper.removeShiftMode(bottomNavView);
 
@@ -139,8 +146,65 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
-
+        checkLocationPermission();
         viewPager.setAdapter(adapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        keepAliveHandler.removeCallbacks(keepAliveTask);
+    }
+
+    private void keepAliveUpdate() {
+        gps = new GPSTracker(MainActivity.this);
+        keepAliveHandler = new Handler();
+
+        updateLocation();
+        keepAliveHandler.postDelayed(keepAliveTask, KEEPALIVE_INTERVAL);
+    }
+
+    private void updateLocation() {
+        if (gps.canGetLocation()) {
+            String latitude = df.format(gps.getLatitude());
+            String longitude = df.format(gps.getLongitude());
+            String time = String.valueOf((new Date().getTime() / 1000));
+
+            MqttMessageHandler mHandler = new MqttMessageHandler();
+            mHandler.encode(MqttMessageHandler.MqttCommand.KEEP_ALIVE,
+                    new String[]{
+                            String.valueOf(pref.getInt("uid", 0)),
+                            time,
+                            latitude,
+                            longitude});
+            MqttHelper.publish(MqttHelper.getUserTopic(), mHandler.getPublish());
+        } else {
+            gps.showSettingsAlert();
+        }
+    }
+
+    private void checkLocationPermission() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
+        } else {
+            keepAliveUpdate();
+        }
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_REQUEST_CODE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                keepAliveUpdate();
+            }
+        }
     }
 
     @Override

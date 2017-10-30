@@ -17,10 +17,13 @@ import android.widget.TextView;
 import my.edu.tarc.kusm_wa14student.communechat.LoginActivity;
 import my.edu.tarc.kusm_wa14student.communechat.R;
 import my.edu.tarc.kusm_wa14student.communechat.internal.ContactDBHandler;
+import my.edu.tarc.kusm_wa14student.communechat.internal.MqttHelper;
 import my.edu.tarc.kusm_wa14student.communechat.model.User;
 
-public class UserFragment extends Fragment {
+public class UserTabFragment extends Fragment {
 
+    private static final int TYPE_MALE = 1;
+    private static final int TYPE_FEMALE = 2;
     //Views
     private TextView tv_Username, tv_Nickname, tv_Status, tv_ContactNum, tv_Logout;
     private ImageView iv_Gender;
@@ -30,19 +33,19 @@ public class UserFragment extends Fragment {
     private SharedPreferences.Editor editor;
     private ContactDBHandler db;
 
-    public UserFragment() {
+    public UserTabFragment() {
         // Required empty public constructor
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_user, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_user_tab, container, false);
 
         user = new User();
 
-        //Share preferences
-        pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        //Shared preferences
+        pref = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
         editor = pref.edit();
 
         if (pref != null) {
@@ -81,13 +84,13 @@ public class UserFragment extends Fragment {
         tv_Username.setText("ID: " + user.getUsername());
         tv_Nickname.setText(user.getNickname());
         tv_Status.setText(user.getStatus());
-        db = new ContactDBHandler(getContext());
+        db = new ContactDBHandler(getContext(), ContactDBHandler.CONTACT_DATABASE);
         tv_ContactNum.setText("" + db.getContactsCount());
 
-        if (user.getGender() == 0) {
+        if (user.getGender() == TYPE_MALE) {
             iv_Gender.setImageDrawable(getResources().getDrawable(R.drawable.ic_boys));
         }
-        if (user.getGender() == 1) {
+        if (user.getGender() == TYPE_FEMALE) {
             iv_Gender.setImageDrawable(getResources().getDrawable(R.drawable.ic_girls));
         }
 
@@ -104,6 +107,8 @@ public class UserFragment extends Fragment {
                                     Intent intent = new Intent(getActivity(), LoginActivity.class);
                                     startActivity(intent);
                                     getActivity().finish();
+                                    MqttHelper.disconnect();
+                                    MqttHelper.startMqtt(getActivity().getApplicationContext());
                                 }
                             }
                         })

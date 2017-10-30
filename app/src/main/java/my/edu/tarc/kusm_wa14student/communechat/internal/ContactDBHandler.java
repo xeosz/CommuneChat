@@ -16,13 +16,12 @@ import my.edu.tarc.kusm_wa14student.communechat.model.Contact;
  */
 
 public class ContactDBHandler extends SQLiteOpenHelper {
+    // Database Name
+    public static final String CONTACT_DATABASE = "contactsManager";
+    public static final String CACHE_DATABASE = "contactsCache";
     // All Static variables
     // Database Version
     private static final int DATABASE_VERSION = 1;
-
-    // Database Name
-    private static final String DATABASE_NAME = "contactsManager";
-
     // Contacts table name
     private static final String TABLE_CONTACTS = "contacts";
 
@@ -36,8 +35,9 @@ public class ContactDBHandler extends SQLiteOpenHelper {
     private static final String KEY_LAST_ONLINE = "last_online";
     private static final String KEY_PH_NO = "phone_number";
 
-    public ContactDBHandler(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+
+    public ContactDBHandler(Context context, String dbName) {
+        super(context, dbName, null, DATABASE_VERSION);
     }
 
     @Override
@@ -84,25 +84,48 @@ public class ContactDBHandler extends SQLiteOpenHelper {
         db.close(); // Closing database connection
     }
 
+    public boolean isContactExists(String uid) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_CONTACTS,
+                new String[]{KEY_ID, KEY_USERNAME, KEY_NICKNAME, KEY_GENDER, KEY_STATUS, KEY_LAST_ONLINE}, KEY_ID + "=?",
+                new String[]{String.valueOf(uid)}, null, null, null, null);
+        if (cursor.getCount() > 0
+                && cursor.moveToFirst()) {
+            if (cursor.getInt(0) != 0
+                    && !cursor.getString(1).isEmpty()
+                    && !cursor.getString(2).isEmpty()
+                    && cursor.getInt(3) != 0
+                    && !cursor.getString(4).isEmpty()
+                    && cursor.getInt(5) != 0)
+                return true;
+        }
+        return false;
+    }
+
     // Getting single contact
-    public Contact getContact(String username) {
+    public Contact getContact(String id) {
         SQLiteDatabase db = this.getReadableDatabase();
 
         Cursor cursor = db.query(TABLE_CONTACTS,
-                new String[]{KEY_ID, KEY_USERNAME, KEY_NICKNAME, KEY_GENDER, KEY_STATUS, KEY_LAST_ONLINE, KEY_PH_NO}, KEY_USERNAME + "=?",
-                new String[]{String.valueOf(username)}, null, null, null, null);
-        if (cursor != null)
-            cursor.moveToFirst();
-
-        Contact contact = new Contact(
-                cursor.getInt(0),                       //id
-                cursor.getString(1),                    //username
-                cursor.getString(2),                    //nickname
-                cursor.getInt(3),                       //gender
-                cursor.getString(4),                    //status
-                cursor.getInt(5),                       //last online
-                cursor.getString(6)                     //phone number
-        );
+                new String[]{KEY_ID, KEY_USERNAME, KEY_NICKNAME, KEY_GENDER, KEY_STATUS, KEY_LAST_ONLINE, KEY_PH_NO}, KEY_ID + "=?",
+                new String[]{String.valueOf(id)}, null, null, null, null);
+        Contact contact = new Contact();
+        if (cursor != null && cursor.moveToFirst()) {
+            if (!cursor.isNull(0))
+                contact.setUid(cursor.getInt(0));                       //id
+            if (!cursor.isNull(1))
+                contact.setUsername(cursor.getString(1));                 //username
+            if (!cursor.isNull(2))
+                contact.setNickname(cursor.getString(2));                  //nickname
+            if (!cursor.isNull(3))
+                contact.setGender(cursor.getInt(3));                    //gender
+            if (!cursor.isNull(4))
+                contact.setStatus(cursor.getString(4));                    //status
+            if (!cursor.isNull(5))
+                contact.setLast_online(cursor.getInt(5));                      //last online
+            if (!cursor.isNull(6))
+                contact.setPhone_number(cursor.getString(6));                     //phone number
+        }
         db.close();
         // return contact
         return contact;
@@ -119,19 +142,26 @@ public class ContactDBHandler extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         // looping through all rows and adding to list
-        while (cursor.moveToNext()) {
+        if (cursor != null && cursor.moveToFirst())
+            do {
                 Contact contact = new Contact();
-
-            contact.setUid(cursor.getInt(0));
-                contact.setUsername(cursor.getString(1));
-                contact.setNickname(cursor.getString(2));
-            contact.setGender(cursor.getInt(3));
-                contact.setStatus(cursor.getString(4));
-            contact.setLast_online(cursor.getInt(5));
-                contact.setPhone_number(cursor.getString(6));
+                if (!cursor.isNull(0))
+                    contact.setUid(cursor.getInt(0));                       //id
+                if (!cursor.isNull(1))
+                    contact.setUsername(cursor.getString(1));                 //username
+                if (!cursor.isNull(2))
+                    contact.setNickname(cursor.getString(2));                  //nickname
+                if (!cursor.isNull(3))
+                    contact.setGender(cursor.getInt(3));                    //gender
+                if (!cursor.isNull(4))
+                    contact.setStatus(cursor.getString(4));                    //status
+                if (!cursor.isNull(5))
+                    contact.setLast_online(cursor.getInt(5));                      //last online
+                if (!cursor.isNull(6))
+                    contact.setPhone_number(cursor.getString(6));                     //phone number
                 // Adding contact to list
                 contactList.add(contact);
-        }
+            } while (cursor.moveToNext());
         db.close();
         // return contact list
         return contactList;
@@ -148,22 +178,34 @@ public class ContactDBHandler extends SQLiteOpenHelper {
         return cursor.getInt(0);
     }
     // Updating single contact
-    public int updateContact(Contact contact) {
+    public int updateSingleContact(Contact contact) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(KEY_ID, contact.getUid());
-        values.put(KEY_USERNAME, contact.getUsername());
-        values.put(KEY_NICKNAME, contact.getNickname());
-        values.put(KEY_GENDER, contact.getGender());
-        values.put(KEY_STATUS, contact.getStatus());
+        if (!contact.getUsername().isEmpty() || contact.getUsername() != null)
+            values.put(KEY_USERNAME, contact.getUsername());
+        if (!contact.getNickname().isEmpty() || contact.getNickname() != null)
+            values.put(KEY_NICKNAME, contact.getNickname());
+        if (contact.getGender() != 0)
+            values.put(KEY_GENDER, contact.getGender());
+        if (!contact.getStatus().isEmpty() || contact.getStatus() != null)
+            values.put(KEY_STATUS, contact.getStatus());
+        if (contact.getLast_online() != 0)
         values.put(KEY_LAST_ONLINE, contact.getLast_online());
-        //values.put(KEY_IMAGE, contact.getPhoneNumber());
+        //values.put(KEY_IMAGE, contact.getImage());
+        if (contact.getPhone_number() != null || !contact.getPhone_number().isEmpty())
         values.put(KEY_PH_NO, contact.getPhone_number());
 
         // updating row
         return db.update(TABLE_CONTACTS, values, KEY_ID + " = ?",
                 new String[] { String.valueOf(contact.getUid()) });
+    }
+
+    public void updateContacts(ArrayList<Contact> contacts) {
+        for (Contact contact : contacts) {
+            updateSingleContact(contact);
+        }
     }
 
     // Deleting single contact
@@ -180,7 +222,7 @@ public class ContactDBHandler extends SQLiteOpenHelper {
         db.execSQL(clearDBQuery);
     }
 
-    public boolean isTableExists() {
+    private boolean isTableExists() {
         String sql = "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='" + TABLE_CONTACTS + "';";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cs = db.rawQuery(sql, null);

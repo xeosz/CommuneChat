@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
-    tools:context="my.edu.tarc.kusm_wa14student.communechat.fragments.ContactFragment">
+    tools:context="my.edu.tarc.kusm_wa14student.communechat.fragments.ContactTabFragment">
 
     <ProgressBar
         android:id="@+id/progressBar_contact_fragment"

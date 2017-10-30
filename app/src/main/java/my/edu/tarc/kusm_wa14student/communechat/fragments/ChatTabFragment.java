@@ -24,7 +24,7 @@ import java.util.ArrayList;
 
 import my.edu.tarc.kusm_wa14student.communechat.R;
 
-public class ChatFragment extends Fragment {
+public class ChatTabFragment extends Fragment {
 
     private ListView chatListView;
     private EditText editText;
@@ -40,7 +40,7 @@ public class ChatFragment extends Fragment {
         }
     };
 
-    public ChatFragment() {
+    public ChatTabFragment() {
         // Required empty public constructor
     }
 
@@ -53,7 +53,7 @@ public class ChatFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_chat, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_chat_tab, container, false);
 
         //Listen to message
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(

@@ -18,21 +18,21 @@ import android.widget.TextView;
 
 import my.edu.tarc.kusm_wa14student.communechat.R;
 
-public class SearchFragment extends Fragment {
+public class SearchTabFragment extends Fragment {
 
     //Views
     private EditText etSearch;
     private Button btnCategory, btnRecommend, btnNearby, btnChat;
 
 
-    public SearchFragment() {
+    public SearchTabFragment() {
         // Required empty public constructor
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_search, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_search_tab, container, false);
 
         //Initialize Views
         etSearch = rootView.findViewById(R.id.editText_search_box);

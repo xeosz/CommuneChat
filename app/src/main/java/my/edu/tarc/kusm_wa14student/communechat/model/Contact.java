@@ -11,14 +11,14 @@ import java.io.ByteArrayOutputStream;
 
 public class Contact {
     private int uid;
-    private String username;
-    private String nickname;
-    private int gender;
-    private String status;
-    private int last_online;
-    private String phone_number;
-    private float latitude;
-    private float longitude;
+    private String username = "";
+    private String nickname = "";
+    private int gender = 0;
+    private String status = "";
+    private int last_online = 0;
+    private String phone_number = "";
+    private float latitude = 0;
+    private float longitude = 0;
 
     private int edges;
     private byte[] image;

@@ -35,12 +35,8 @@ import my.edu.tarc.kusm_wa14student.communechat.internal.MqttMessageHandler;
 import my.edu.tarc.kusm_wa14student.communechat.model.Contact;
 import my.edu.tarc.kusm_wa14student.communechat.model.User;
 
-public class ContactFragment extends Fragment {
-    //MQTTClient configuration
-    final private String subscriptionTopic = "sensor/test";
-    UpdateListTask task = new UpdateListTask();
-    private String TAG = "ContactFragment";
-
+public class ContactTabFragment extends Fragment {
+    UpdateListTask task;
     //ListViewAdapter variables
     private ArrayList<Contact> contacts = new ArrayList<>();
     private CustomAdapter adapter;
@@ -64,7 +60,7 @@ public class ContactFragment extends Fragment {
         }
     };
 
-    public ContactFragment() {
+    public ContactTabFragment() {
         // Required empty public constructor
     }
 
@@ -73,7 +69,6 @@ public class ContactFragment extends Fragment {
             if (!asyncTask.isCancelled()) {
                 asyncTask.cancel(true);
             }
-            asyncTask = null;
         }
     }
 
@@ -91,13 +86,13 @@ public class ContactFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        final View rootView = inflater.inflate(R.layout.fragment_contact, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_contact_tab, container, false);
 
         contacts = new ArrayList<>();
         user = new User();
 
         //Share preferences
-        pref = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        pref = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
         editor = pref.edit();
         if (pref != null) {
             user.setUid(pref.getInt("uid", 0));
@@ -120,7 +115,7 @@ public class ContactFragment extends Fragment {
         final Animation onClickAnimation = new AlphaAnimation(0.3f, 1.0f);
         onClickAnimation.setDuration(1000);
 
-        db = new ContactDBHandler(getContext());
+        db = new ContactDBHandler(getActivity().getApplicationContext(), ContactDBHandler.CONTACT_DATABASE);
 
         adapter.registerDataSetObserver(new DataSetObserver() {
             @Override
@@ -136,7 +131,7 @@ public class ContactFragment extends Fragment {
                 Contact tempContact = (Contact) contactListView.getItemAtPosition(i);
                 Bundle bundle = new Bundle();
 
-                bundle.putString("fid", tempContact.getUsername());
+                bundle.putString("FID", String.valueOf(tempContact.getUid()));
 
                 intent.putExtras(bundle);
                 getActivity().startActivity(intent);
@@ -147,7 +142,6 @@ public class ContactFragment extends Fragment {
         });
         getContactList();
         requestContactData(String.valueOf(user.getUid()));
-
         //Check list contents
         checkContent(contacts, rootView);
         return rootView;
@@ -179,7 +173,7 @@ public class ContactFragment extends Fragment {
         ArrayList<Contact> result = new ArrayList<>();
         MqttMessageHandler msg = new MqttMessageHandler();
         msg.encode(MqttMessageHandler.MqttCommand.REQ_CONTACT_LIST, uid);
-        MqttHelper.publish(subscriptionTopic, msg.getPublish());
+        MqttHelper.publish(MqttHelper.getUserTopic(), msg.getPublish());
         return result;
     }
 
@@ -191,7 +185,6 @@ public class ContactFragment extends Fragment {
     }
 
     private class UpdateListTask extends AsyncTask<String, Void, Void> {
-
 
         @Override
         protected void onPreExecute() {
@@ -234,7 +227,7 @@ public class ContactFragment extends Fragment {
     private class CustomAdapter extends ArrayAdapter<Contact> {
         Context mContext;
 
-        public CustomAdapter(ArrayList<Contact> contacts, int resources, Context context) {
+        private CustomAdapter(ArrayList<Contact> contacts, int resources, Context context) {
             super(context, resources, contacts);
             this.mContext = context;
         }

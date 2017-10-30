@@ -2,8 +2,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="my.edu.tarc.kusm_wa14student.communechat.fragments.ChatFragment"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context="my.edu.tarc.kusm_wa14student.communechat.fragments.ChatTabFragment">
 
     <!-- TODO: Update blank fragment layout -->
     <ListView
@@ -18,16 +18,16 @@
     <EditText
         android:id="@+id/editTextChat"
         android:layout_width="0dp"
-        android:layout_weight="8"
-        android:layout_gravity="center_vertical"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="8"
         android:ems="10"
         android:inputType="text"/>
     <Button
         android:id="@+id/button"
         android:layout_width="0dp"
-        android:layout_weight="2"
         android:layout_height="wrap_content"
+        android:layout_weight="2"
         android:text="Send" />
     </LinearLayout>
 

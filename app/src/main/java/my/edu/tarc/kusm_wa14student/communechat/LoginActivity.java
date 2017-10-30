@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -35,8 +36,7 @@ import my.edu.tarc.kusm_wa14student.communechat.model.User;
 
 public class LoginActivity extends AppCompatActivity {
 
-    //var
-    String[] str;
+    private static final long TASK_TIMEOUT = 10000;
     //Views
     private EditText etPassword;
     private AutoCompleteTextView etLogin;
@@ -58,14 +58,14 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        pref = PreferenceManager.getDefaultSharedPreferences(this);
+        //Start service
+        startService(new Intent(LoginActivity.this, MessageService.class));
+
+        pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         editor = pref.edit();
         if (pref != null) {
             checkLogin(pref.getBoolean("authentication", false));
         }
-
-        //Start service
-        startService(new Intent(LoginActivity.this, MessageService.class));
 
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 mMessageReceiver, new IntentFilter("MessageEvent"));
@@ -116,7 +116,7 @@ public class LoginActivity extends AppCompatActivity {
                                 Toast.makeText(LoginActivity.this, "Connection timeout", Toast.LENGTH_SHORT).show();
                             }
                         }
-                    }, 6000);
+                    }, TASK_TIMEOUT);
                 }
             }
         });
@@ -133,8 +133,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private void goToMain() {
         Intent intent = new Intent(this, MainActivity.class);
-
-
         editor.putBoolean("authentication", true);
 
         editor.putInt("uid", user.getUid());
@@ -160,9 +158,15 @@ public class LoginActivity extends AppCompatActivity {
         editor.putString("intake", user.getIntake());
         editor.putInt("academic_year", user.getAcademic_year());
         editor.commit();
-
+        resetConnection(String.valueOf(user.getUid()));
         startActivity(intent);
         finish();
+    }
+
+    private void resetConnection(String uid) {
+        //Reset MQTT
+        MqttHelper.startMqtt(getApplicationContext(), uid);
+        MqttHelper.subscribe(MqttHelper.getUserTopic(uid));
     }
 
     private boolean isNetworkAvailable() {
@@ -206,21 +210,23 @@ public class LoginActivity extends AppCompatActivity {
                             handler.setReceived(message);
                             message = "";
                             if (handler.mqttCommand == MqttMessageHandler.MqttCommand.ACK_AUTHENTICATION) {
-                                if (handler.isLoginAuthenticated() == 3)
+                                if (handler.isLoginAuthenticated() == 3) {
                                     user = handler.getUserData();
+                                    Log.i("login", user.getNickname());
+                                }
                                 result = handler.isLoginAuthenticated();
                             }
                         } else {
                             this.doInBackground();
                         }
-
-                        MqttHelper.unsubscribe(uniqueTopic);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 } else
                     result = 4;
             }
+
+            MqttHelper.unsubscribe(uniqueTopic);
             return result;
         }
 

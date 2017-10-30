@@ -11,6 +11,7 @@ import my.edu.tarc.kusm_wa14student.communechat.model.User;
 
 public class MqttMessageHandler {
     private final static String RESERVED_STRING = "000000000000000000000000";
+
     //Static Variables
     private static String REQ_AUTHENTICATION = "003801";
     private static String ACK_AUTHENTICATION = "003802";
@@ -18,31 +19,34 @@ public class MqttMessageHandler {
     private static String ACK_CONTACT_LIST = "003811";
     private static String REQ_CONTACT_DETAILS = "003812";
     private static String ACK_CONTACT_DETAILS = "003813";
-    private static String REQ_USER_PROFILE = "003814";
-    private static String ACK_USER_PROFILE = "003815";
+
     private static String REQ_SEARCH_USER = "003816";
     private static String ACK_SEARCH_USER = "003817";
-    private static String REQ_REC_FRIENDS = "003818";
-    private static String ACK_REC_FRIENDS = "003819";
+    private static String REQ_RECOMMEND_FRIENDS = "003818";
+    private static String ACK_RECOMMEND_FRIENDS = "003819";
+    private static String REQ_FRIEND_REQUEST = "003820";
+    private static String ACK_FRIEND_REQUEST = "003821";
+    private static String REQ_FRIEND_REQUEST_LIST = "003822";
+    private static String ACK_FRIEND_REQUEST_LIST = "003823";
     private static String KEEP_ALIVE = "003999";
+
     public MqttCommand mqttCommand;
     private String publish;
     private String received;
     //FORMAT
 
     //Command Range 003801 - 004000
-    //Reserved 24Bytes / 12Chars
+    //Reserved 24Bytes / 24Chars
+
     public MqttMessageHandler() {
     }
     public String getPublish() {
         return publish;
     }
-
     public void setReceived(String received) {
         this.received = received;
-        this.decode();
+        this.decode(received);
     }
-
     public void encode(MqttCommand command, Object data) {
         StringBuilder sb = new StringBuilder();
         String result = null;
@@ -68,9 +72,12 @@ public class MqttMessageHandler {
                 break;
             }
             case REQ_CONTACT_DETAILS: {
-                break;
-            }
-            case REQ_USER_PROFILE: {
+                String uid;
+                uid = (String) data;
+                sb.append(REQ_CONTACT_DETAILS
+                        + RESERVED_STRING
+                        + uid);
+                result = sb.toString();
                 break;
             }
             case REQ_SEARCH_USER: {
@@ -81,124 +88,72 @@ public class MqttMessageHandler {
                 result = sb.toString();
                 break;
             }
-            case REQ_REC_FRIENDS: {
+            case REQ_RECOMMEND_FRIENDS: {
                 String uid = (String) data;
-                sb.append(REQ_REC_FRIENDS
+                sb.append(REQ_RECOMMEND_FRIENDS
                         + RESERVED_STRING
                         + uid);
                 result = sb.toString();
                 break;
             }
+            case REQ_FRIEND_REQUEST: {
+                break;
+            }
+            case REQ_FRIEND_REQUEST_LIST: {
+                String uid = (String) data;
+                sb.append(REQ_FRIEND_REQUEST_LIST
+                        + RESERVED_STRING
+                        + uid);
+                break;
+            }
             case KEEP_ALIVE: {
+                String[] update = (String[]) data;
+                sb.append(KEEP_ALIVE
+                        + RESERVED_STRING
+                        + update[0]
+                        + update[1]
+                        + String.format("%02d", update[2].length())
+                        + update[2]
+                        + String.format("%02d", update[3].length())
+                        + update[3]);
+                result = sb.toString();
                 break;
             }
         }
         this.publish = result;
     }
 
-    private void decode() {
-        if (!received.isEmpty() && received.length() >= 30) {
-            String command = received.substring(0, 6);
-            switch (command) {
-                case "003802": {
-                    this.mqttCommand = MqttCommand.ACK_AUTHENTICATION;
-                    break;
-                }
-                case "003811": {
-                    this.mqttCommand = MqttCommand.ACK_CONTACT_LIST;
-                    break;
-                }
-                case "003813": {
-                    this.mqttCommand = MqttCommand.ACK_CONTACT_DETAILS;
-                    break;
-                }
-                case "003815": {
-                    this.mqttCommand = MqttCommand.ACK_USER_PROFILE;
-                    break;
-                }
-                case "003817": {
-                    this.mqttCommand = MqttCommand.ACK_SEARCH_USER;
-                    break;
-                }
-                case "003819": {
-                    this.mqttCommand = MqttCommand.ACK_REC_FRIENDS;
-                    break;
-                }
-                default:
-                    this.mqttCommand = null;
-            }
+    private void decode(String msg) {
+        if (!msg.isEmpty() && msg.length() >= 30) {
+            String data = msg.substring(0, 6);
+
+            if (data.equalsIgnoreCase(ACK_AUTHENTICATION)) {
+                this.mqttCommand = MqttCommand.ACK_AUTHENTICATION;
+
+            } else if (data.equalsIgnoreCase(ACK_CONTACT_LIST)) {
+                this.mqttCommand = MqttCommand.ACK_CONTACT_LIST;
+
+            } else if (data.equalsIgnoreCase(ACK_CONTACT_DETAILS)) {
+                this.mqttCommand = MqttCommand.ACK_CONTACT_DETAILS;
+
+            } else if (data.equalsIgnoreCase(ACK_SEARCH_USER)) {
+                this.mqttCommand = MqttCommand.ACK_SEARCH_USER;
+
+            } else if (data.equalsIgnoreCase(ACK_RECOMMEND_FRIENDS)) {
+                this.mqttCommand = MqttCommand.ACK_RECOMMEND_FRIENDS;
+
+            } else if (data.equalsIgnoreCase(ACK_FRIEND_REQUEST)) {
+                this.mqttCommand = MqttCommand.ACK_FRIEND_REQUEST;
+
+            } else if (data.equalsIgnoreCase(ACK_FRIEND_REQUEST_LIST)) {
+                this.mqttCommand = MqttCommand.ACK_FRIEND_REQUEST_LIST;
+
+            } else
+                this.mqttCommand = null;
         }
     }
-
-    public ArrayList<Contact> getSearchResultByName() {
-        ArrayList<Contact> contacts = new ArrayList<>();
-        if (mqttCommand == MqttCommand.ACK_SEARCH_USER) {
-            received = received.substring(30);
-            int temp;
-            String data = received;
-            while (!data.isEmpty()) {
-                Contact contact = new Contact();
-
-                contact.setUid(Integer.parseInt(data.substring(0, 10)));
-                data = data.substring(10);
-
-                contact.setGender(Integer.parseInt(data.substring(0, 1)));
-                data = data.substring(1);
-
-                contact.setLast_online(Integer.parseInt(data.substring(0, 10)));
-                data = data.substring(10);
-
-                temp = Integer.parseInt(data.substring(0, 3));
-                data = data.substring(3);
-                contact.setUsername(data.substring(0, temp));
-                data = data.substring(temp);
-
-                temp = Integer.parseInt(data.substring(0, 3));
-                data = data.substring(3);
-                contact.setNickname(data.substring(0, temp));
-                data = data.substring(temp);
-
-                temp = Integer.parseInt(data.substring(0, 3));
-                data = data.substring(3);
-                contact.setStatus(data.substring(0, temp));
-                data = data.substring(temp);
-
-                contacts.add(contact);
-            }
-        }
-        return contacts;
-    }
-
-    public ArrayList<Contact> getRecommendedFriends() {
-        ArrayList<Contact> contacts = new ArrayList<>();
-        if (mqttCommand == MqttCommand.ACK_REC_FRIENDS) {
-            received = received.substring(30);
-            int temp;
-            String data = received;
-            while (!data.isEmpty()) {
-                Contact contact = new Contact();
-
-                contact.setUid(Integer.parseInt(data.substring(0, 10)));
-                data = data.substring(10);
-
-                temp = Integer.parseInt(data.substring(0, 3));
-                data = data.substring(3);
-                contact.setNickname(data.substring(0, temp));
-                data = data.substring(temp);
-
-                temp = Integer.parseInt(data.substring(0, 1));
-                data = data.substring(1);
-                contact.setEdges(Integer.parseInt(data.substring(0, temp)));
-                data = data.substring(temp);
-
-                contacts.add(contact);
-            }
-        }
-        return contacts;
-    }
-
     public int isLoginAuthenticated() {
-        if (mqttCommand == MqttCommand.ACK_AUTHENTICATION) {
+        if (this.mqttCommand == MqttCommand.ACK_AUTHENTICATION) {
             String data = received.substring(30);
             if (data.equalsIgnoreCase("1")) {
                 return 1;
@@ -209,10 +164,9 @@ public class MqttMessageHandler {
         } else
             return 4;
     }
-
     public User getUserData() {
         User user = new User();
-        if (mqttCommand == MqttCommand.ACK_AUTHENTICATION) {
+        if (this.mqttCommand == MqttCommand.ACK_AUTHENTICATION) {
             received = received.substring(30);
             int temp = 0;
             String data = received;
@@ -308,15 +262,74 @@ public class MqttMessageHandler {
         }
         return user;
     }
-
     public ArrayList<Contact> getContactList() {
         ArrayList<Contact> contacts = new ArrayList<>();
-        if (mqttCommand == MqttCommand.ACK_CONTACT_LIST) {
+        if (this.mqttCommand == MqttCommand.ACK_CONTACT_LIST) {
             received = received.substring(30);
             int temp = 0;
             String data = received;
-            // Data structure sequence
-            // id / gender / last online / sizeof / username / sizeof / nickname / sizeof / status / sizeof / phone number
+            // id  / sizeof / nickname / sizeof / status
+            while (!data.isEmpty()) {
+                Contact contact = new Contact();
+
+                contact.setUid(Integer.parseInt(data.substring(0, 10)));
+                data = data.substring(10);
+
+                temp = Integer.parseInt(data.substring(0, 3));
+                data = data.substring(3);
+                contact.setNickname(data.substring(0, temp));
+                data = data.substring(temp);
+
+                temp = Integer.parseInt(data.substring(0, 3));
+                data = data.substring(3);
+                contact.setStatus(data.substring(0, temp));
+                data = data.substring(temp);
+
+                contacts.add(contact);
+            }
+        }
+        return contacts;
+    }
+
+    public Contact getContactDetails() {
+        Contact contact = new Contact();
+        if (this.mqttCommand == MqttCommand.ACK_CONTACT_DETAILS) {
+            received = received.substring(30);
+            int temp;
+            String data = received;
+
+            contact.setUid(Integer.parseInt(data.substring(0, 10)));
+            data = data.substring(10);
+
+            contact.setGender(Integer.parseInt(data.substring(0, 1)));
+            data = data.substring(1);
+
+            contact.setLast_online(Integer.parseInt(data.substring(0, 10)));
+            data = data.substring(10);
+
+            temp = Integer.parseInt(data.substring(0, 3));
+            data = data.substring(3);
+            contact.setUsername(data.substring(0, temp));
+            data = data.substring(temp);
+
+            temp = Integer.parseInt(data.substring(0, 3));
+            data = data.substring(3);
+            contact.setNickname(data.substring(0, temp));
+            data = data.substring(temp);
+
+            temp = Integer.parseInt(data.substring(0, 3));
+            data = data.substring(3);
+            contact.setStatus(data.substring(0, temp));
+        }
+        return contact;
+    }
+
+    public ArrayList<Contact> getSearchResultByName() {
+        ArrayList<Contact> contacts = new ArrayList<>();
+        if (mqttCommand == MqttCommand.ACK_SEARCH_USER) {
+            received = received.substring(30);
+            int temp;
+            String data = received;
             while (!data.isEmpty()) {
                 Contact contact = new Contact();
 
@@ -344,9 +357,61 @@ public class MqttMessageHandler {
                 contact.setStatus(data.substring(0, temp));
                 data = data.substring(temp);
 
+                contacts.add(contact);
+            }
+        }
+        return contacts;
+    }
+
+    public ArrayList<Contact> getRecommendedFriends() {
+        ArrayList<Contact> contacts = new ArrayList<>();
+        if (this.mqttCommand == MqttCommand.ACK_RECOMMEND_FRIENDS) {
+            received = received.substring(30);
+            int temp;
+            String data = received;
+            while (!data.isEmpty()) {
+                Contact contact = new Contact();
+
+                contact.setUid(Integer.parseInt(data.substring(0, 10)));
+                data = data.substring(10);
+
                 temp = Integer.parseInt(data.substring(0, 3));
                 data = data.substring(3);
-                contact.setPhone_number(data.substring(0, temp));
+                contact.setNickname(data.substring(0, temp));
+                data = data.substring(temp);
+
+                temp = Integer.parseInt(data.substring(0, 1));
+                data = data.substring(1);
+                contact.setEdges(Integer.parseInt(data.substring(0, temp)));
+                data = data.substring(temp);
+
+                contacts.add(contact);
+            }
+        }
+        return contacts;
+    }
+
+    public ArrayList<Contact> getFriendRequestList() {
+        ArrayList<Contact> contacts = new ArrayList<>();
+        if (this.mqttCommand == MqttCommand.ACK_FRIEND_REQUEST_LIST) {
+            received = received.substring(30);
+            int temp = 0;
+            String data = received;
+
+            while (!data.isEmpty()) {
+                Contact contact = new Contact();
+
+                contact.setUid(Integer.parseInt(data.substring(0, 10)));
+                data = data.substring(10);
+
+                temp = Integer.parseInt(data.substring(0, 3));
+                data = data.substring(3);
+                contact.setNickname(data.substring(0, temp));
+                data = data.substring(temp);
+
+                temp = Integer.parseInt(data.substring(0, 3));
+                data = data.substring(3);
+                contact.setStatus(data.substring(0, temp));
                 data = data.substring(temp);
 
                 contacts.add(contact);
@@ -360,8 +425,8 @@ public class MqttMessageHandler {
                 this.mqttCommand == MqttCommand.ACK_CONTACT_LIST ||
                 this.mqttCommand == MqttCommand.ACK_SEARCH_USER ||
                 this.mqttCommand == MqttCommand.ACK_CONTACT_DETAILS ||
-                this.mqttCommand == MqttCommand.ACK_USER_PROFILE ||
-                this.mqttCommand == MqttCommand.ACK_REC_FRIENDS);
+                this.mqttCommand == MqttCommand.ACK_FRIEND_REQUEST ||
+                this.mqttCommand == MqttCommand.ACK_RECOMMEND_FRIENDS);
     }
 
     public enum MqttCommand {
@@ -371,12 +436,14 @@ public class MqttMessageHandler {
         ACK_CONTACT_LIST,
         REQ_CONTACT_DETAILS,
         ACK_CONTACT_DETAILS,
-        REQ_USER_PROFILE,
-        ACK_USER_PROFILE,
+        REQ_FRIEND_REQUEST,
+        ACK_FRIEND_REQUEST,
+        REQ_FRIEND_REQUEST_LIST,
+        ACK_FRIEND_REQUEST_LIST,
         REQ_SEARCH_USER,
         ACK_SEARCH_USER,
-        REQ_REC_FRIENDS,
-        ACK_REC_FRIENDS,
+        REQ_RECOMMEND_FRIENDS,
+        ACK_RECOMMEND_FRIENDS,
         KEEP_ALIVE;
     }
 

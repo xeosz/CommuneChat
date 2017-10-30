@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:background="@color/colorListItemBackground"
+    android:maxHeight="?android:attr/listPreferredItemHeight"
+    android:minHeight="?android:attr/listPreferredItemHeight">
+
+    <LinearLayout
+        android:id="@+id/single_contact_request_frame"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:orientation="horizontal"
+        android:paddingBottom="10dp"
+        android:paddingTop="10dp">
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="25">
+
+            <my.edu.tarc.kusm_wa14student.communechat.components.CircleImageView
+                android:id="@+id/contact_request_image"
+                android:layout_width="?android:attr/listPreferredItemHeightSmall"
+                android:layout_height="?android:attr/listPreferredItemHeightSmall"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_person"
+                app:civ_border_color="@android:color/white"
+                app:civ_border_width="2dp"
+                app:civ_fill_color="@android:color/background_light" />
+        </FrameLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="55"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/contact_request_name"
+                style="@style/ContactNameSize"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="left|center_vertical"
+                android:singleLine="true"
+                android:textColor="@android:color/black"
+                android:textStyle="normal" />
+
+            <TextView
+                android:id="@+id/contact_request_bottomlayer"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="left|center_vertical"
+                android:singleLine="true"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="18sp" />
+
+        </LinearLayout>
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="20">
+
+            <Button
+                android:id="@+id/btn_contact_request_accept"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/medium_margin"
+                android:layout_marginStart="@dimen/medium_margin"
+                android:background="@drawable/round_frame"
+                android:backgroundTint="@color/colorCombination5"
+                android:text="@string/accept"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/small_title" />
+
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <View
+        style="@style/Divider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/single_contact_request_frame" />
+
+</RelativeLayout>
