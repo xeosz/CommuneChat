@@ -7,6 +7,7 @@ import org.eclipse.paho.android.service.MqttAndroidClient;
 import org.eclipse.paho.client.mqttv3.DisconnectedBufferOptions;
 import org.eclipse.paho.client.mqttv3.IMqttActionListener;
 import org.eclipse.paho.client.mqttv3.IMqttToken;
+import org.eclipse.paho.client.mqttv3.MqttAsyncClient;
 import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
@@ -24,6 +25,7 @@ import static org.eclipse.paho.client.mqttv3.MqttConnectOptions.KEEP_ALIVE_INTER
 public final class MqttHelper {
     private static final String TAG = "MQTTHelper";
     private static MqttAndroidClient mqttAndroidClient;
+    private static MqttAsyncClient mqttAsyncClient;
     private static MqttConnectOptions mqttConnectOptions = new MqttConnectOptions();
     private static DisconnectedBufferOptions disconnectedBufferOptions = new DisconnectedBufferOptions();
 
@@ -65,6 +67,7 @@ public final class MqttHelper {
         } catch (MqttException e) {
             e.printStackTrace();
         }
+
     }
 
     public static void startMqtt(Context context, String Id) {

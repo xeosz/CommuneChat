@@ -18,7 +18,6 @@ import my.edu.tarc.kusm_wa14student.communechat.LoginActivity;
 import my.edu.tarc.kusm_wa14student.communechat.R;
 import my.edu.tarc.kusm_wa14student.communechat.internal.ContactDBHandler;
 import my.edu.tarc.kusm_wa14student.communechat.internal.MessageService;
-import my.edu.tarc.kusm_wa14student.communechat.internal.MqttHelper;
 import my.edu.tarc.kusm_wa14student.communechat.model.User;
 
 public class UserTabFragment extends Fragment {
@@ -131,7 +130,6 @@ public class UserTabFragment extends Fragment {
         Intent intent = new Intent(getActivity(), LoginActivity.class);
         startActivity(intent);
         getActivity().finish();
-        MqttHelper.disconnect();
         getActivity().stopService(new Intent(getActivity(), MessageService.class));
         ContactDBHandler db = new ContactDBHandler(getActivity().getApplicationContext());
         db.clearDatabase();

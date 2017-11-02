@@ -23,6 +23,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import my.edu.tarc.kusm_wa14student.communechat.R;
+import my.edu.tarc.kusm_wa14student.communechat.internal.MqttHelper;
 
 public class ChatTabFragment extends Fragment {
 
@@ -78,6 +79,7 @@ public class ChatTabFragment extends Fragment {
                 Animation onClickAnimation = new AlphaAnimation(0.3f, 1.0f);
                 onClickAnimation.setDuration(2000);
                 view.startAnimation(onClickAnimation);
+
             }
         });
 
@@ -85,6 +87,9 @@ public class ChatTabFragment extends Fragment {
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                MqttHelper.subscribe("MY/TARUC/000000001/CCS/PUB/CHAT/lol");
+
             }});
 
         // Inflate the layout for this fragment

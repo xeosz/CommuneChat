@@ -19,7 +19,8 @@ public class MqttMessageHandler {
     private static String ACK_CONTACT_LIST = "003811";
     private static String REQ_CONTACT_DETAILS = "003812";
     private static String ACK_CONTACT_DETAILS = "003813";
-
+    private static String REQ_NEARBY_FRIENDS = "003814";
+    private static String ACK_NEARBY_FRIENDS = "003815";
     private static String REQ_SEARCH_USER = "003816";
     private static String ACK_SEARCH_USER = "003817";
     private static String REQ_RECOMMEND_FRIENDS = "003818";
@@ -77,6 +78,14 @@ public class MqttMessageHandler {
                 String uid;
                 uid = (String) data;
                 sb.append(REQ_CONTACT_DETAILS
+                        + RESERVED_STRING
+                        + uid);
+                result = sb.toString();
+                break;
+            }
+            case REQ_NEARBY_FRIENDS: {
+                String uid = (String) data;
+                sb.append(REQ_NEARBY_FRIENDS
                         + RESERVED_STRING
                         + uid);
                 result = sb.toString();
@@ -154,6 +163,9 @@ public class MqttMessageHandler {
             } else if (data.equalsIgnoreCase(ACK_CONTACT_DETAILS)) {
                 this.mqttCommand = MqttCommand.ACK_CONTACT_DETAILS;
 
+            } else if (data.equalsIgnoreCase(ACK_NEARBY_FRIENDS)) {
+                this.mqttCommand = MqttCommand.ACK_NEARBY_FRIENDS;
+
             } else if (data.equalsIgnoreCase(ACK_SEARCH_USER)) {
                 this.mqttCommand = MqttCommand.ACK_SEARCH_USER;
 
@@ -184,6 +196,7 @@ public class MqttMessageHandler {
         } else
             return 4;
     }
+
     public User getUserData() {
         User user = new User();
         if (this.mqttCommand == MqttCommand.ACK_AUTHENTICATION) {
@@ -282,6 +295,7 @@ public class MqttMessageHandler {
         }
         return user;
     }
+
     public ArrayList<Contact> getContactList() {
         ArrayList<Contact> contacts = new ArrayList<>();
         if (this.mqttCommand == MqttCommand.ACK_CONTACT_LIST) {
@@ -342,6 +356,34 @@ public class MqttMessageHandler {
             contact.setStatus(data.substring(0, temp));
         }
         return contact;
+    }
+
+    public ArrayList<Contact> getNearbyFriends() {
+        ArrayList<Contact> contacts = new ArrayList<>();
+        if (mqttCommand == MqttCommand.ACK_NEARBY_FRIENDS) {
+            received = received.substring(30);
+            int temp;
+            String data = received;
+            while (!data.isEmpty()) {
+                Contact contact = new Contact();
+
+                contact.setUid(Integer.parseInt(data.substring(0, 10)));
+                data = data.substring(10);
+
+                temp = Integer.parseInt(data.substring(0, 3));
+                data = data.substring(3);
+                contact.setNickname(data.substring(0, temp));
+                data = data.substring(temp);
+
+                temp = Integer.parseInt(data.substring(0, 1));
+                data = data.substring(1);
+                contact.setDistance(Integer.parseInt(data.substring(0, temp)));
+                data = data.substring(temp);
+
+                contacts.add(contact);
+            }
+        }
+        return contacts;
     }
 
     public ArrayList<Contact> getSearchResultByName() {
@@ -445,6 +487,7 @@ public class MqttMessageHandler {
                 this.mqttCommand == MqttCommand.ACK_CONTACT_LIST ||
                 this.mqttCommand == MqttCommand.ACK_SEARCH_USER ||
                 this.mqttCommand == MqttCommand.ACK_CONTACT_DETAILS ||
+                this.mqttCommand == MqttCommand.ACK_NEARBY_FRIENDS ||
                 this.mqttCommand == MqttCommand.ACK_FRIEND_REQUEST ||
                 this.mqttCommand == MqttCommand.ACK_FRIEND_REQUEST_LIST ||
                 this.mqttCommand == MqttCommand.ACK_RECOMMEND_FRIENDS ||
@@ -458,6 +501,8 @@ public class MqttMessageHandler {
         ACK_CONTACT_LIST,
         REQ_CONTACT_DETAILS,
         ACK_CONTACT_DETAILS,
+        REQ_NEARBY_FRIENDS,
+        ACK_NEARBY_FRIENDS,
         REQ_FRIEND_REQUEST,
         ACK_FRIEND_REQUEST,
         REQ_FRIEND_REQUEST_LIST,

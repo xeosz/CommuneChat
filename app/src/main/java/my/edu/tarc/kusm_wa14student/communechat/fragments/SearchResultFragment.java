@@ -25,6 +25,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -34,6 +35,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import my.edu.tarc.kusm_wa14student.communechat.ProfileActivity;
 import my.edu.tarc.kusm_wa14student.communechat.R;
 import my.edu.tarc.kusm_wa14student.communechat.internal.MqttHelper;
 import my.edu.tarc.kusm_wa14student.communechat.internal.MqttMessageHandler;
@@ -68,7 +70,6 @@ public class SearchResultFragment extends Fragment {
             message = intent.getStringExtra("message");
         }
     };
-    private String uniqueTopic = "sensor/test";
 
     public SearchResultFragment() {
         // Required empty public constructor
@@ -122,6 +123,7 @@ public class SearchResultFragment extends Fragment {
                 case SEARCH_NEARBY: {
                     container.setVisibility(View.GONE);
                     tvTitle.setText(getArguments().getString("TITLE"));
+                    runSearchNearbyFriends(String.valueOf(user.getUid()));
                     break;
                 }
                 case SEARCH_REC: {
@@ -197,7 +199,42 @@ public class SearchResultFragment extends Fragment {
             }
         });
 
+        listViewResult.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                view.startAnimation(onClickAnimation);
+
+                Intent intent = new Intent(getActivity(), ProfileActivity.class);
+                Contact tempContact = (Contact) listViewResult.getItemAtPosition(i);
+                Bundle bundle = new Bundle();
+
+                bundle.putString("FID", String.valueOf(tempContact.getUid()));
+
+                intent.putExtras(bundle);
+                getActivity().startActivity(intent);
+            }
+        });
+
+
         return rootView;
+    }
+
+    private void runSearchNearbyFriends(String s) {
+        final LoadingTask task = new LoadingTask(s, SEARCH_NEARBY);
+        task.execute();
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (task.getStatus() == AsyncTask.Status.RUNNING) {
+                    task.cancel(true);
+                    progressBar.setVisibility(View.GONE);
+                    tvMessage.setVisibility(View.VISIBLE);
+                    tvMessage.setText("Connection Timeout.");
+                    tvMessage.bringToFront();
+                }
+            }
+        }, TASK_TIMEOUT);
     }
 
 
@@ -278,6 +315,11 @@ public class SearchResultFragment extends Fragment {
                 MqttHelper.publish(MqttHelper.getPublishTopic(), handler.getPublish());
                 contacts.clear();
                 refreshList(SEARCH_REC);
+            } else if (this.type == SEARCH_NEARBY) {
+                handler.encode(MqttMessageHandler.MqttCommand.REQ_NEARBY_FRIENDS, searchString);
+                MqttHelper.publish(MqttHelper.getPublishTopic(), handler.getPublish());
+                contacts.clear();
+                refreshList(SEARCH_NEARBY);
             }
         }
 
@@ -296,6 +338,9 @@ public class SearchResultFragment extends Fragment {
                         } else if (handler.mqttCommand == MqttMessageHandler.MqttCommand.ACK_RECOMMEND_FRIENDS) {
                             contacts = handler.getRecommendedFriends();
                             return 2;
+                        } else if (handler.mqttCommand == MqttMessageHandler.MqttCommand.ACK_NEARBY_FRIENDS) {
+                            contacts = handler.getNearbyFriends();
+                            return 3;
                         }
 
                     } else {
@@ -317,9 +362,16 @@ public class SearchResultFragment extends Fragment {
                 tvMessage.setVisibility(View.VISIBLE);
                 tvMessage.bringToFront();
             } else if (integer == 1) {
-                refreshList(SEARCH_BY_NAME);
+                if (contacts.size() <= 0) {
+                    tvMessage.setText("No user matchings");
+                    tvMessage.setVisibility(View.VISIBLE);
+                    tvMessage.bringToFront();
+                } else
+                    refreshList(SEARCH_BY_NAME);
             } else if (integer == 2) {
                 refreshList(SEARCH_REC);
+            } else if (integer == 3) {
+                refreshList(SEARCH_NEARBY);
             }
         }
     }
@@ -356,6 +408,8 @@ public class SearchResultFragment extends Fragment {
                     break;
                 }
                 case SEARCH_NEARBY: {
+                    viewHolder.tvName.setText(contact.getNickname());
+                    viewHolder.tvBottom.setText(contact.getDistance() + " metres");
                     break;
                 }
                 case SEARCH_REC: {
@@ -367,6 +421,7 @@ public class SearchResultFragment extends Fragment {
                     break;
                 }
             }
+
             return convertView;
         }
     }

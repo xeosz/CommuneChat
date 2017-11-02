@@ -218,7 +218,7 @@ public class ContactTabFragment extends Fragment {
             int result = 0;
             if (!isCancelled()) {
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(1500);
                     if (!message.isEmpty()) {
                         handler.setReceived(message);
                         message = "";

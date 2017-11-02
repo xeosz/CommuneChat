@@ -20,6 +20,10 @@ import my.edu.tarc.kusm_wa14student.communechat.R;
 
 public class SearchTabFragment extends Fragment {
 
+    private static final int SEARCH_BY_NAME = 0;
+    private static final int SEARCH_CATEGORY = 1;
+    private static final int SEARCH_NEARBY = 2;
+    private static final int SEARCH_REC = 3;
     //Views
     private EditText etSearch;
     private Button btnCategory, btnRecommend, btnNearby, btnChat, btnFriendRequest;
@@ -62,7 +66,7 @@ public class SearchTabFragment extends Fragment {
                     //Pass data into fragment
                     Bundle args = new Bundle();
                     args.putString("SEARCH_STRING", etSearch.getText().toString());
-                    args.putInt("TYPE", 0);
+                    args.putInt("TYPE", SEARCH_BY_NAME);
 
                     Fragment fragment = new SearchResultFragment();
                     fragment.setArguments(args);
@@ -87,7 +91,7 @@ public class SearchTabFragment extends Fragment {
 
                 Bundle args = new Bundle();
                 args.putString("TITLE", "PASS");
-                args.putInt("TYPE", 1);
+                args.putInt("TYPE", SEARCH_CATEGORY);
 
                 Fragment fragment = new SearchResultFragment();
                 fragment.setArguments(args);
@@ -124,7 +128,7 @@ public class SearchTabFragment extends Fragment {
 
                 Bundle args = new Bundle();
                 args.putString("TITLE", "Nearby Friends");
-                args.putInt("TYPE", 2);
+                args.putInt("TYPE", SEARCH_NEARBY);
 
                 Fragment fragment = new SearchResultFragment();
                 fragment.setArguments(args);
@@ -145,7 +149,7 @@ public class SearchTabFragment extends Fragment {
 
                 Bundle args = new Bundle();
                 args.putString("TITLE", "Suggested Friends");
-                args.putInt("TYPE", 3);
+                args.putInt("TYPE", SEARCH_REC);
 
                 Fragment fragment = new SearchResultFragment();
                 fragment.setArguments(args);

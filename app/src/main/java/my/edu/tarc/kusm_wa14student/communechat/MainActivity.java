@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         //Start service
-        startService(new Intent(MainActivity.this, MessageService.class));
+        this.startService(new Intent(MainActivity.this, MessageService.class));
 
         pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 

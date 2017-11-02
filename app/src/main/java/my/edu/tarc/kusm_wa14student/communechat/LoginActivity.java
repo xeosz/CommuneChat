@@ -165,7 +165,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void resetConnection() {
-        MqttHelper.disconnect();
         this.stopService(new Intent(this, MessageService.class));
     }
 
