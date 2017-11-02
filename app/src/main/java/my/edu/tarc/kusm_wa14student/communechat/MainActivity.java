@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
         //Start service
         startService(new Intent(MainActivity.this, MessageService.class));
+
         pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         //Initialize views
@@ -162,14 +163,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void keepAliveUpdate() {
-        gps = new GPSTracker(MainActivity.this);
         keepAliveHandler = new Handler();
-
         updateLocation();
         keepAliveHandler.postDelayed(keepAliveTask, KEEPALIVE_INTERVAL);
     }
 
     private void updateLocation() {
+        gps = new GPSTracker(MainActivity.this);
         if (gps.canGetLocation()) {
             String latitude = df.format(gps.getLatitude());
             String longitude = df.format(gps.getLongitude());
@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity {
                             time,
                             latitude,
                             longitude});
-            MqttHelper.publish(MqttHelper.getUserTopic(), mHandler.getPublish());
+            MqttHelper.publish(MqttHelper.getPublishTopic(), mHandler.getPublish());
         } else {
             gps.showSettingsAlert();
         }

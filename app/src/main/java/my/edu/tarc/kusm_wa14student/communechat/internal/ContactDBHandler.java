@@ -17,14 +17,14 @@ import my.edu.tarc.kusm_wa14student.communechat.model.Contact;
 
 public class ContactDBHandler extends SQLiteOpenHelper {
     // Database Name
-    public static final String CONTACT_DATABASE = "contactsManager";
-    public static final String CACHE_DATABASE = "contactsCache";
+    public static final String DATABASE_NAME = "contactsManager";
+    // Contacts table name
+    public static final String TABLE_CONTACTS = "contacts";
+    public static final String TABLE_CACHE = "cacheContacts";
+    public static final String TABLE_FRIEND_REQUEST = "friendRequests";
     // All Static variables
     // Database Version
     private static final int DATABASE_VERSION = 1;
-    // Contacts table name
-    private static final String TABLE_CONTACTS = "contacts";
-
     // Contacts Table Columns names
     private static final String KEY_ID = "uid";
     private static final String KEY_USERNAME = "username";
@@ -35,58 +35,90 @@ public class ContactDBHandler extends SQLiteOpenHelper {
     private static final String KEY_LAST_ONLINE = "last_online";
     private static final String KEY_PH_NO = "phone_number";
 
+    private static String CREATE_CONTACTS_TABLE =
+            "CREATE TABLE IF NOT EXISTS " + TABLE_CONTACTS + " ("
+                    + KEY_ID + " INTEGER PRIMARY KEY, "
+                    + KEY_USERNAME + " TEXT, "
+                    + KEY_NICKNAME + " TEXT, "
+                    + KEY_GENDER + " INTEGER, "
+                    + KEY_STATUS + " TEXT, "
+                    + KEY_LAST_ONLINE + " INTEGER, "
+                    + KEY_PH_NO + " TEXT"
+                    + ");";
+    private static String CREATE_CACHE_TABLE =
+            "CREATE TABLE IF NOT EXISTS " + TABLE_CACHE + " ("
+                    + KEY_ID + " INTEGER PRIMARY KEY, "
+                    + KEY_USERNAME + " TEXT, "
+                    + KEY_NICKNAME + " TEXT, "
+                    + KEY_GENDER + " INTEGER, "
+                    + KEY_STATUS + " TEXT, "
+                    + KEY_LAST_ONLINE + " INTEGER, "
+                    + KEY_PH_NO + " TEXT"
+                    + ");";
+    private static String CREATE_FRIENDREQUEST_TABLE =
+            "CREATE TABLE IF NOT EXISTS " + TABLE_FRIEND_REQUEST + " ("
+                    + KEY_ID + " INTEGER PRIMARY KEY, "
+                    + KEY_USERNAME + " TEXT, "
+                    + KEY_NICKNAME + " TEXT, "
+                    + KEY_GENDER + " INTEGER, "
+                    + KEY_STATUS + " TEXT, "
+                    + KEY_LAST_ONLINE + " INTEGER, "
+                    + KEY_PH_NO + " TEXT"
+                    + ");";
 
-    public ContactDBHandler(Context context, String dbName) {
-        super(context, dbName, null, DATABASE_VERSION);
+    public ContactDBHandler(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         // + KEY_IMAGE + " BLOB"
-        String CREATE_CONTACTS_TABLE =
-                "CREATE TABLE IF NOT EXISTS " + TABLE_CONTACTS + " ("
-                        + KEY_ID + " INTEGER PRIMARY KEY, "
-                        + KEY_USERNAME + " TEXT, "
-                        + KEY_NICKNAME + " TEXT, "
-                        + KEY_GENDER + " INTEGER, "
-                        + KEY_STATUS + " TEXT, "
-                        + KEY_LAST_ONLINE + " INTEGER, "
-                        + KEY_PH_NO + " TEXT"
-                        +");";
         sqLiteDatabase.execSQL(CREATE_CONTACTS_TABLE);
+        sqLiteDatabase.execSQL(CREATE_CACHE_TABLE);
+        sqLiteDatabase.execSQL(CREATE_FRIENDREQUEST_TABLE);
+
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
         // Drop older table if existed
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_CONTACTS);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_CACHE);
+        sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + TABLE_FRIEND_REQUEST);
+
         // Create tables again
         onCreate(sqLiteDatabase);
     }
 
     // Adding new contact
-    public void addContact(Contact contact) {
+    public void addContact(Contact contact, String tableName) {
         SQLiteDatabase db = this.getWritableDatabase();
-
         ContentValues values = new ContentValues();
 
-        values.put(KEY_ID, contact.getUid());
-        values.put(KEY_USERNAME, contact.getUsername());
-        values.put(KEY_NICKNAME, contact.getNickname());
-        values.put(KEY_GENDER, contact.getGender());
-        values.put(KEY_STATUS, contact.getStatus());
-        values.put(KEY_LAST_ONLINE, contact.getLast_online());
-        //values.put(KEY_IMAGE, contact.getPhoneNumber());
-        values.put(KEY_PH_NO, contact.getPhone_number());
+        if (tableName == TABLE_CONTACTS || tableName == TABLE_FRIEND_REQUEST) {
+            values.put(KEY_ID, contact.getUid());
+            values.put(KEY_NICKNAME, contact.getNickname());
+            values.put(KEY_STATUS, contact.getStatus());
+        }
 
+        if (tableName == TABLE_CACHE) {
+            values.put(KEY_ID, contact.getUid());
+            values.put(KEY_USERNAME, contact.getUsername());
+            values.put(KEY_NICKNAME, contact.getNickname());
+            values.put(KEY_GENDER, contact.getGender());
+            values.put(KEY_STATUS, contact.getStatus());
+            values.put(KEY_LAST_ONLINE, contact.getLast_online());
+            //values.put(KEY_IMAGE, contact.getPhoneNumber());
+            //values.put(KEY_PH_NO, contact.getPhone_number());
+        }
         // Inserting Row
-        db.insert(TABLE_CONTACTS, null, values);
+        db.insert(tableName, null, values);
         db.close(); // Closing database connection
     }
 
-    public boolean isContactExists(String uid) {
+    public boolean isContactExists(String uid, String tableName) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_CONTACTS,
+        Cursor cursor = db.query(tableName,
                 new String[]{KEY_ID, KEY_USERNAME, KEY_NICKNAME, KEY_GENDER, KEY_STATUS, KEY_LAST_ONLINE}, KEY_ID + "=?",
                 new String[]{String.valueOf(uid)}, null, null, null, null);
         if (cursor.getCount() > 0
@@ -103,10 +135,10 @@ public class ContactDBHandler extends SQLiteOpenHelper {
     }
 
     // Getting single contact
-    public Contact getContact(String id) {
+    public Contact getContact(String id, String tableName) {
         SQLiteDatabase db = this.getReadableDatabase();
 
-        Cursor cursor = db.query(TABLE_CONTACTS,
+        Cursor cursor = db.query(tableName,
                 new String[]{KEY_ID, KEY_USERNAME, KEY_NICKNAME, KEY_GENDER, KEY_STATUS, KEY_LAST_ONLINE, KEY_PH_NO}, KEY_ID + "=?",
                 new String[]{String.valueOf(id)}, null, null, null, null);
         Contact contact = new Contact();
@@ -132,11 +164,11 @@ public class ContactDBHandler extends SQLiteOpenHelper {
     }
 
     // Getting All Contacts
-    public List<Contact> getAllContacts() {
+    public List<Contact> getAllContacts(String tableName) {
         List<Contact> contactList = new ArrayList<Contact>();
         // Select All Query
         String selectQuery = "SELECT " + KEY_ID + ", " + KEY_USERNAME + ", " + KEY_NICKNAME + ", " + KEY_GENDER + ", " + KEY_STATUS + ", "
-                + KEY_LAST_ONLINE + ", " + KEY_PH_NO + " FROM " + TABLE_CONTACTS;
+                + KEY_LAST_ONLINE + ", " + KEY_PH_NO + " FROM " + tableName;
 
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -168,8 +200,8 @@ public class ContactDBHandler extends SQLiteOpenHelper {
     }
 
     // Getting contacts Count
-    public int getContactsCount() {
-        String countQuery = "SELECT  COUNT(*) FROM '" + TABLE_CONTACTS + "';";
+    public int getContactsCount(String tableName) {
+        String countQuery = "SELECT  COUNT(*) FROM '" + tableName + "';";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
         cursor.moveToFirst();
@@ -178,7 +210,7 @@ public class ContactDBHandler extends SQLiteOpenHelper {
         return cursor.getInt(0);
     }
     // Updating single contact
-    public int updateSingleContact(Contact contact) {
+    public int updateSingleContact(Contact contact, String tableName) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -198,32 +230,39 @@ public class ContactDBHandler extends SQLiteOpenHelper {
         values.put(KEY_PH_NO, contact.getPhone_number());
 
         // updating row
-        return db.update(TABLE_CONTACTS, values, KEY_ID + " = ?",
+        return db.update(tableName, values, KEY_ID + " = ?",
                 new String[] { String.valueOf(contact.getUid()) });
     }
 
-    public void updateContacts(ArrayList<Contact> contacts) {
+    public void updateContacts(ArrayList<Contact> contacts, String tableName) {
         for (Contact contact : contacts) {
-            updateSingleContact(contact);
+            updateSingleContact(contact, tableName);
         }
     }
 
     // Deleting single contact
-    public void deleteContact(Contact contact) {
+    public void deleteContact(Contact contact, String tableName) {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_CONTACTS, KEY_ID + " = ?",
+        db.delete(tableName, KEY_ID + " = ?",
                 new String[] { String.valueOf(contact.getUid()) });
         db.close();
     }
 
     public void clearDatabase() {
-        String clearDBQuery = "DELETE FROM "+TABLE_CONTACTS;
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL(clearDBQuery);
+        Cursor c = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
+        List<String> tables = new ArrayList<>();
+
+        while (c.moveToNext()) {
+            tables.add(c.getString(0));
+        }
+        for (String table : tables) {
+            clearTable(table);
+        }
     }
 
-    private boolean isTableExists() {
-        String sql = "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='" + TABLE_CONTACTS + "';";
+    private boolean isTableExists(String tableName) {
+        String sql = "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='" + tableName + "';";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cs = db.rawQuery(sql, null);
         cs.moveToFirst();
@@ -231,10 +270,10 @@ public class ContactDBHandler extends SQLiteOpenHelper {
         return cs.getInt(0) == 1;
     }
 
-    public void clearTable() {
-        if (this.isTableExists()) {
+    public void clearTable(String tableName) {
+        if (this.isTableExists(tableName)) {
             SQLiteDatabase db = this.getWritableDatabase();
-            db.delete(TABLE_CONTACTS, null, null);
+            db.delete(tableName, null, null);
             db.close();
         }
     }

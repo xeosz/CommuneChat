@@ -30,7 +30,7 @@ public final class MqttHelper {
     //Static MQTT Connection Variables
     private static String userTopic;
     private static String clientId;
-    private static String topicFormat = "/";
+    private static String topicFormat = "MY/TARUC/CCS/000000001/PUB/USER/";
     private static String serverUri = "tcp://m11.cloudmqtt.com:17391";
     private static String mqttUsername = "ehvfrtgx";
     private static String mqttPassword = "YPcMC08pYYpr";
@@ -49,11 +49,21 @@ public final class MqttHelper {
         clientId = generateRandomClientId();
         mqttAndroidClient = new MqttAndroidClient(context, serverUri, clientId);
         try {
-            connect();
-            Log.i("[MQTTHELPER]before", mqttAndroidClient.getClientId());
+            IMqttToken token = connect();
+            token.setActionCallback(new IMqttActionListener() {
+                @Override
+                public void onSuccess(IMqttToken asyncActionToken) {
+                    Log.i("[MQTTHELPER]before", mqttAndroidClient.getClientId());
+
+                }
+
+                @Override
+                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                    Log.i("[MQTTHELPER]before", "fail");
+                }
+            });
         } catch (MqttException e) {
             e.printStackTrace();
-            Log.i("[MQTTHELPER]before", "fail");
         }
     }
 
@@ -62,21 +72,34 @@ public final class MqttHelper {
         clientId = Id;
         mqttAndroidClient = new MqttAndroidClient(context, serverUri, Id);
         try {
-            connect();
-            Log.i("after login", mqttAndroidClient.getClientId());
+            IMqttToken token = connect();
+            token.setActionCallback(new IMqttActionListener() {
+                @Override
+                public void onSuccess(IMqttToken asyncActionToken) {
+                    Log.i("[MQTTHELPER]after", mqttAndroidClient.getClientId());
+                    subscribe(MqttHelper.getSubscribeTopic());
+                }
+
+                @Override
+                public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
+                    Log.i("[MQTTHELPER]after", "fail");
+                }
+            });
         } catch (MqttException e) {
             e.printStackTrace();
-            Log.i("[MQTTHELPER]after", "fail");
         }
     }
 
-    public static String getUserTopic() {
+    public static String getSubscribeTopic() {
         return userTopic;
     }
 
-    public static String getUserTopic(String uid) {
-        userTopic = topicFormat + uid;
+    public static String getPublishTopic() {
         return userTopic;
+    }
+
+    private static String getUserTopic(String uid) {
+        return topicFormat + uid;
     }
 
     public static void setCallback(MqttCallbackExtended callback) {
@@ -111,7 +134,7 @@ public final class MqttHelper {
                         setDisconnectBufferOption();
                         try {
                             mqttAndroidClient.subscribe(subscriptionTopic, QoS);
-                            Log.i(TAG, "Subscribed to " + subscriptionTopic);
+                            Log.i(TAG, "[SUBSCRIBED] " + subscriptionTopic);
                         } catch (MqttException e) {
                             Log.w(TAG, "Failed to subscribe to topic: " + subscriptionTopic + ".");
                             e.printStackTrace();
@@ -130,6 +153,7 @@ public final class MqttHelper {
             try {
                 setDisconnectBufferOption();
                 mqttAndroidClient.subscribe(subscriptionTopic, QoS);
+                Log.i(TAG, "[SUBSCRIBED] " + subscriptionTopic);
             } catch (MqttException e) {
                 Log.w(TAG, "Failed to subscribe to topic: " + subscriptionTopic + ".");
                 e.printStackTrace();
@@ -152,6 +176,7 @@ public final class MqttHelper {
                         setDisconnectBufferOption();
                         try {
                             mqttAndroidClient.publish(publishTopic, message);
+                            Log.i(TAG, "[PUBLISH] " + message);
                         } catch (MqttException e) {
                             Log.w(TAG, "Failed to publish messsage: \"" + payload + "\" on topic: " + publishTopic + ".");
                             e.printStackTrace();

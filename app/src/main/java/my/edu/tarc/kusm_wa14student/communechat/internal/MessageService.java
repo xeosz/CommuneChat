@@ -51,8 +51,8 @@ public class MessageService extends Service {
             //Start MQTT Connection
             if (pref.getInt("uid", 0) != 0) {
                 MqttHelper.startMqtt(getApplicationContext(), String.valueOf(pref.getInt("uid", 0)));
-                Log.i("[Service] ", "" + pref.getInt("uid", 0) + "" + MqttHelper.getUserTopic());
-                MqttHelper.subscribe(MqttHelper.getUserTopic());
+                MqttHelper.subscribe(MqttHelper.getSubscribeTopic());
+                Log.i("[Service] ", "[CLIENT ID]" + pref.getInt("uid", 0) + " [SUBSCRIPTION TOPIC]" + MqttHelper.getSubscribeTopic());
             } else {
                 MqttHelper.startMqtt(getApplicationContext());
             }
@@ -70,12 +70,13 @@ public class MessageService extends Service {
 
                 @Override
                 public void messageArrived(String topic, MqttMessage message) throws Exception {
+                    Log.i(TAG, "[RECEIVED] " + message.toString());
                     if (isReceiving(message.toString())) {
                         if (appInForeground(getApplicationContext())) {
                             sendMessage(topic, message.toString());
-                            Log.i(TAG, "Foreground" + message.toString());
+                            Log.i(TAG, "[Foreground]" + message.toString());
                         } else {
-                            Log.i(TAG, "background" + message.toString());
+                            Log.i(TAG, "[Background]" + message.toString());
                             buffer.push(topic, message.toString());
                         }
                     }

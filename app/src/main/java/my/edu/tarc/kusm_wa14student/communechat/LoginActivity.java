@@ -45,7 +45,7 @@ public class LoginActivity extends AppCompatActivity {
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
     private User user = new User();
-    private String uniqueTopic = UUID.randomUUID().toString() + (new Date().getTime() / 1000);
+    private String uniqueTopic = "MY/TARUC/CCS/000000001/PUB/USER/" + UUID.randomUUID().toString() + (new Date().getTime() / 1000);
     private String message = "";
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -59,7 +59,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         //Start service
-        startService(new Intent(LoginActivity.this, MessageService.class));
+        this.startService(new Intent(LoginActivity.this, MessageService.class));
 
         pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         editor = pref.edit();
@@ -100,6 +100,7 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 if (etLogin.getText().toString().isEmpty() || etPassword.getText().toString().isEmpty()) {
                     Toast.makeText(LoginActivity.this, "Please enter login username and password.", Toast.LENGTH_SHORT).show();
                 } else {
@@ -158,15 +159,14 @@ public class LoginActivity extends AppCompatActivity {
         editor.putString("intake", user.getIntake());
         editor.putInt("academic_year", user.getAcademic_year());
         editor.commit();
-        resetConnection(String.valueOf(user.getUid()));
+        resetConnection();
         startActivity(intent);
         finish();
     }
 
-    private void resetConnection(String uid) {
-        //Reset MQTT
-        MqttHelper.startMqtt(getApplicationContext(), uid);
-        MqttHelper.subscribe(MqttHelper.getUserTopic(uid));
+    private void resetConnection() {
+        MqttHelper.disconnect();
+        this.stopService(new Intent(this, MessageService.class));
     }
 
     private boolean isNetworkAvailable() {
@@ -215,6 +215,7 @@ public class LoginActivity extends AppCompatActivity {
                                     Log.i("login", user.getNickname());
                                 }
                                 result = handler.isLoginAuthenticated();
+                                MqttHelper.unsubscribe(uniqueTopic);
                             }
                         } else {
                             this.doInBackground();
@@ -225,8 +226,6 @@ public class LoginActivity extends AppCompatActivity {
                 } else
                     result = 4;
             }
-
-            MqttHelper.unsubscribe(uniqueTopic);
             return result;
         }
 

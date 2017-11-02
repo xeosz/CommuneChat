@@ -31,8 +31,8 @@
             android:background="@drawable/bottom_border"
             android:elevation="6dp"
             android:orientation="horizontal"
-            android:paddingLeft="@dimen/small_margin"
-            android:paddingRight="@dimen/small_margin">
+            android:paddingLeft="@dimen/xtra_small_margin"
+            android:paddingRight="@dimen/xtra_small_margin">
 
             <FrameLayout
                 android:layout_width="0dp"

@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.database.DataSetObserver;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -36,6 +37,7 @@ import my.edu.tarc.kusm_wa14student.communechat.model.Contact;
 import my.edu.tarc.kusm_wa14student.communechat.model.User;
 
 public class ContactTabFragment extends Fragment {
+    private static final long TASK_TIMEOUT = 6000;
     UpdateListTask task;
     //ListViewAdapter variables
     private ArrayList<Contact> contacts = new ArrayList<>();
@@ -51,12 +53,12 @@ public class ContactTabFragment extends Fragment {
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
     private ContactDBHandler db;
+    private String TABLE_NAME = db.TABLE_CONTACTS;
+    private String message = "";
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String message = intent.getStringExtra("message");
-            task = new UpdateListTask();
-            task.execute(message);
+            message = intent.getStringExtra("message");
         }
     };
 
@@ -75,7 +77,6 @@ public class ContactTabFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        clearAsyncTask(task);
     }
 
     @Override
@@ -90,6 +91,7 @@ public class ContactTabFragment extends Fragment {
 
         contacts = new ArrayList<>();
         user = new User();
+
 
         //Share preferences
         pref = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
@@ -115,18 +117,21 @@ public class ContactTabFragment extends Fragment {
         final Animation onClickAnimation = new AlphaAnimation(0.3f, 1.0f);
         onClickAnimation.setDuration(1000);
 
-        db = new ContactDBHandler(getActivity().getApplicationContext(), ContactDBHandler.CONTACT_DATABASE);
+        db = new ContactDBHandler(getActivity().getApplicationContext());
 
         adapter.registerDataSetObserver(new DataSetObserver() {
             @Override
             public void onChanged() {
                 super.onChanged();
-                checkContent(contacts, rootView);
+                checkContent(contacts);
             }
         });
         contactListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                //OnClick Animation
+                view.startAnimation(onClickAnimation);
+
                 Intent intent = new Intent(getActivity(), ProfileActivity.class);
                 Contact tempContact = (Contact) contactListView.getItemAtPosition(i);
                 Bundle bundle = new Bundle();
@@ -135,46 +140,53 @@ public class ContactTabFragment extends Fragment {
 
                 intent.putExtras(bundle);
                 getActivity().startActivity(intent);
-
-                //OnClick Animation
-                view.startAnimation(onClickAnimation);
             }
         });
-        getContactList();
-        requestContactData(String.valueOf(user.getUid()));
+        renderView();
+        runUpdateTask(String.valueOf(user.getUid()));
         //Check list contents
-        checkContent(contacts, rootView);
         return rootView;
+    }
+
+    private void runUpdateTask(String uid) {
+        final UpdateListTask task = new UpdateListTask(uid);
+        task.execute();
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (task.getStatus() == AsyncTask.Status.RUNNING) {
+                    task.cancel(true);
+                    progressBar.setVisibility(View.GONE);
+                }
+            }
+        }, TASK_TIMEOUT);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        runUpdateTask(String.valueOf(user.getUid()));
     }
 
-    private void getContactList() {
+    private void renderView() {
         contacts.clear();
-        ArrayList<Contact> dbContacts = (ArrayList<Contact>) db.getAllContacts();
-        for (Contact c : dbContacts)
-            contacts.add(c);
+        ArrayList<Contact> dbContacts = (ArrayList<Contact>) db.getAllContacts(TABLE_NAME);
+        if (dbContacts.size() > 0) {
+            for (Contact c : dbContacts)
+                contacts.add(c);
+        }
+        checkContent(contacts);
         adapter.notifyDataSetChanged();
     }
 
-    private void checkContent(ArrayList contacts, View rootView) {
+    private void checkContent(ArrayList contacts) {
         if (!contacts.isEmpty()) {
             tvMain.setVisibility(View.INVISIBLE);
         } else {
             tvMain.setText("Opps! No contact at the moment.");
             tvMain.setVisibility(View.VISIBLE);
         }
-    }
-
-    private ArrayList<Contact> requestContactData(String uid) {
-        ArrayList<Contact> result = new ArrayList<>();
-        MqttMessageHandler msg = new MqttMessageHandler();
-        msg.encode(MqttMessageHandler.MqttCommand.REQ_CONTACT_LIST, uid);
-        MqttHelper.publish(MqttHelper.getUserTopic(), msg.getPublish());
-        return result;
     }
 
     //-----Adapter Class-----
@@ -184,43 +196,55 @@ public class ContactTabFragment extends Fragment {
         //ImageView info;
     }
 
-    private class UpdateListTask extends AsyncTask<String, Void, Void> {
+    private class UpdateListTask extends AsyncTask<Void, Void, Integer> {
+
+        private final String uid;
+        private MqttMessageHandler handler = new MqttMessageHandler();
+
+        public UpdateListTask(String uid) {
+            this.uid = uid;
+        }
 
         @Override
         protected void onPreExecute() {
-            progressBar.setVisibility(View.VISIBLE);
             super.onPreExecute();
+            progressBar.setVisibility(View.VISIBLE);
+            handler.encode(MqttMessageHandler.MqttCommand.REQ_CONTACT_LIST, uid);
+            MqttHelper.publish(MqttHelper.getPublishTopic(), handler.getPublish());
         }
 
         @Override
-        protected Void doInBackground(String... strings) {
-
-            if (!strings[0].isEmpty()) {
-                MqttMessageHandler handler = new MqttMessageHandler();
-                handler.setReceived(strings[0]);
-                if (handler.mqttCommand != null) {
-                    switch (handler.mqttCommand) {
-                        case ACK_CONTACT_LIST: {
-                            db.clearTable();
-
+        protected Integer doInBackground(Void... voids) {
+            int result = 0;
+            if (!isCancelled()) {
+                try {
+                    Thread.sleep(1000);
+                    if (!message.isEmpty()) {
+                        handler.setReceived(message);
+                        message = "";
+                        if (handler.mqttCommand == MqttMessageHandler.MqttCommand.ACK_CONTACT_LIST) {
+                            db.clearTable(TABLE_NAME);
                             ArrayList<Contact> contactList = handler.getContactList();
                             for (Contact temp : contactList)
-                                db.addContact(temp);
-                            break;
+                                db.addContact(temp, TABLE_NAME);
+                            return 1;
                         }
-
+                    } else {
+                        MqttHelper.publish(MqttHelper.getPublishTopic(), handler.getPublish());
+                        this.doInBackground();
                     }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
-
-            return null;
+            return result;
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
+        protected void onPostExecute(Integer integer) {
+            super.onPostExecute(integer);
             progressBar.setVisibility(View.GONE);
-            getContactList();
+            renderView();
         }
     }
 

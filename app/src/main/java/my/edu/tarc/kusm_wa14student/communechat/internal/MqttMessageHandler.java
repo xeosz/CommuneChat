@@ -28,6 +28,8 @@ public class MqttMessageHandler {
     private static String ACK_FRIEND_REQUEST = "003821";
     private static String REQ_FRIEND_REQUEST_LIST = "003822";
     private static String ACK_FRIEND_REQUEST_LIST = "003823";
+    private static String REQ_RESPONSE_FRIEND_REQUEST = "003824";
+    private static String ACK_RESPONSE_FRIEND_REQUEST = "003825";
     private static String KEEP_ALIVE = "003999";
 
     public MqttCommand mqttCommand;
@@ -97,6 +99,12 @@ public class MqttMessageHandler {
                 break;
             }
             case REQ_FRIEND_REQUEST: {
+                String[] id = (String[]) data;
+                sb.append(REQ_FRIEND_REQUEST
+                        + RESERVED_STRING
+                        + id[0]
+                        + id[1]);
+                result = sb.toString();
                 break;
             }
             case REQ_FRIEND_REQUEST_LIST: {
@@ -104,6 +112,16 @@ public class MqttMessageHandler {
                 sb.append(REQ_FRIEND_REQUEST_LIST
                         + RESERVED_STRING
                         + uid);
+                result = sb.toString();
+                break;
+            }
+            case REQ_RESPONSE_FRIEND_REQUEST: {
+                String[] id = (String[]) data;
+                sb.append(REQ_RESPONSE_FRIEND_REQUEST
+                        + RESERVED_STRING
+                        + id[0]
+                        + id[1]);
+                result = sb.toString();
                 break;
             }
             case KEEP_ALIVE: {
@@ -148,6 +166,8 @@ public class MqttMessageHandler {
             } else if (data.equalsIgnoreCase(ACK_FRIEND_REQUEST_LIST)) {
                 this.mqttCommand = MqttCommand.ACK_FRIEND_REQUEST_LIST;
 
+            } else if (data.equalsIgnoreCase(ACK_RESPONSE_FRIEND_REQUEST)) {
+                this.mqttCommand = MqttCommand.ACK_RESPONSE_FRIEND_REQUEST;
             } else
                 this.mqttCommand = null;
         }
@@ -426,7 +446,9 @@ public class MqttMessageHandler {
                 this.mqttCommand == MqttCommand.ACK_SEARCH_USER ||
                 this.mqttCommand == MqttCommand.ACK_CONTACT_DETAILS ||
                 this.mqttCommand == MqttCommand.ACK_FRIEND_REQUEST ||
-                this.mqttCommand == MqttCommand.ACK_RECOMMEND_FRIENDS);
+                this.mqttCommand == MqttCommand.ACK_FRIEND_REQUEST_LIST ||
+                this.mqttCommand == MqttCommand.ACK_RECOMMEND_FRIENDS ||
+                this.mqttCommand == MqttCommand.ACK_RESPONSE_FRIEND_REQUEST);
     }
 
     public enum MqttCommand {
@@ -440,6 +462,8 @@ public class MqttMessageHandler {
         ACK_FRIEND_REQUEST,
         REQ_FRIEND_REQUEST_LIST,
         ACK_FRIEND_REQUEST_LIST,
+        REQ_RESPONSE_FRIEND_REQUEST,
+        ACK_RESPONSE_FRIEND_REQUEST,
         REQ_SEARCH_USER,
         ACK_SEARCH_USER,
         REQ_RECOMMEND_FRIENDS,

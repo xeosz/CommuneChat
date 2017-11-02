@@ -25,5 +25,6 @@
     <string name="send_message">Send Message</string>
     <string name="send">Send</string>
     <string name="accept">Accept</string>
+    <string name="friend_request">Friend Requests</string>
 
 </resources>

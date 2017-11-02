@@ -19,7 +19,6 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -203,7 +202,7 @@ public class SearchResultFragment extends Fragment {
 
 
     private void runSearchByNameTask(String string) {
-        final SearchByName task = new SearchByName(string);
+        final LoadingTask task = new LoadingTask(string, SEARCH_BY_NAME);
         task.execute();
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -212,7 +211,6 @@ public class SearchResultFragment extends Fragment {
                 if (task.getStatus() == AsyncTask.Status.RUNNING) {
                     task.cancel(true);
                     progressBar.setVisibility(View.GONE);
-                    getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                     tvMessage.setVisibility(View.VISIBLE);
                     tvMessage.setText("Connection Timeout.");
                     tvMessage.bringToFront();
@@ -222,7 +220,7 @@ public class SearchResultFragment extends Fragment {
     }
 
     private void runSearchRecommendedFriends(String uid) {
-        final SearchRecommendFriend task = new SearchRecommendFriend(uid);
+        final LoadingTask task = new LoadingTask(uid, SEARCH_REC);
         task.execute();
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -231,7 +229,6 @@ public class SearchResultFragment extends Fragment {
                 if (task.getStatus() == AsyncTask.Status.RUNNING) {
                     task.cancel(true);
                     progressBar.setVisibility(View.GONE);
-                    getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
                     tvMessage.setVisibility(View.VISIBLE);
                     tvMessage.setText("Connection Timeout.");
                     tvMessage.bringToFront();
@@ -253,78 +250,15 @@ public class SearchResultFragment extends Fragment {
         //ImageView info;
     }
 
-    private class SearchRecommendFriend extends AsyncTask<Void, Void, Integer> {
-
-        private MqttMessageHandler handler = new MqttMessageHandler();
-        private String id;
-
-        private SearchRecommendFriend(String id) {
-            this.id = id;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            progressBar.setVisibility(View.VISIBLE);
-            progressBar.bringToFront();
-            tvMessage.setText("");
-            tvMessage.setVisibility(View.INVISIBLE);
-            getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-            handler.encode(MqttMessageHandler.MqttCommand.REQ_RECOMMEND_FRIENDS, this.id);
-            MqttHelper.publish(MqttHelper.getUserTopic(), handler.getPublish());
-            contacts.clear();
-            refreshList(SEARCH_REC);
-        }
-
-        @Override
-        protected Integer doInBackground(Void... voids) {
-            int result = 0;
-            if (!isCancelled()) {
-                try {
-                    Thread.sleep(2000);
-                    if (!message.isEmpty()) {
-                        handler.setReceived(message);
-                        message = "";
-                        if (handler.mqttCommand == MqttMessageHandler.MqttCommand.REQ_RECOMMEND_FRIENDS) {
-                            contacts = handler.getRecommendedFriends();
-                            if (contacts.size() > 0) {
-                                return 1;
-                            } else
-                                return 0;
-                        }
-                    } else {
-                        this.doInBackground();
-                    }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            return result;
-        }
-
-        @Override
-        protected void onPostExecute(Integer integer) {
-            super.onPostExecute(integer);
-            progressBar.setVisibility(View.GONE);
-            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-            if (integer == 0) {
-                tvMessage.setText("No similar friends");
-                tvMessage.setVisibility(View.VISIBLE);
-                tvMessage.bringToFront();
-            } else if (integer == 1) {
-                refreshList(SEARCH_REC);
-            }
-        }
-    }
-
-    private class SearchByName extends AsyncTask<Void, Void, Integer> {
+    private class LoadingTask extends AsyncTask<Void, Void, Integer> {
 
         private MqttMessageHandler handler = new MqttMessageHandler();
         private String searchString;
+        private int type;
 
-        private SearchByName(String search) {
-            this.searchString = search;
+        private LoadingTask(String data, int type) {
+            this.searchString = data;
+            this.type = type;
         }
 
         @Override
@@ -334,12 +268,17 @@ public class SearchResultFragment extends Fragment {
             progressBar.bringToFront();
             tvMessage.setText("");
             tvMessage.setVisibility(View.INVISIBLE);
-            getActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-            handler.encode(MqttMessageHandler.MqttCommand.REQ_SEARCH_USER, searchString);
-            MqttHelper.publish(MqttHelper.getUserTopic(), handler.getPublish());
-            contacts.clear();
-            refreshList(SEARCH_BY_NAME);
+            if (this.type == SEARCH_BY_NAME) {
+                handler.encode(MqttMessageHandler.MqttCommand.REQ_SEARCH_USER, searchString);
+                MqttHelper.publish(MqttHelper.getPublishTopic(), handler.getPublish());
+                contacts.clear();
+                refreshList(SEARCH_BY_NAME);
+            } else if (this.type == SEARCH_REC) {
+                handler.encode(MqttMessageHandler.MqttCommand.REQ_RECOMMEND_FRIENDS, searchString);
+                MqttHelper.publish(MqttHelper.getPublishTopic(), handler.getPublish());
+                contacts.clear();
+                refreshList(SEARCH_REC);
+            }
         }
 
         @Override
@@ -353,11 +292,12 @@ public class SearchResultFragment extends Fragment {
                         message = "";
                         if (handler.mqttCommand == MqttMessageHandler.MqttCommand.ACK_SEARCH_USER) {
                             contacts = handler.getSearchResultByName();
-                            if (contacts.size() > 0) {
-                                return 1;
-                            } else
-                                return 0;
+                            return 1;
+                        } else if (handler.mqttCommand == MqttMessageHandler.MqttCommand.ACK_RECOMMEND_FRIENDS) {
+                            contacts = handler.getRecommendedFriends();
+                            return 2;
                         }
+
                     } else {
                         this.doInBackground();
                     }
@@ -372,13 +312,14 @@ public class SearchResultFragment extends Fragment {
         protected void onPostExecute(Integer integer) {
             super.onPostExecute(integer);
             progressBar.setVisibility(View.GONE);
-            getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             if (integer == 0) {
-                tvMessage.setText("No user matchings \"" + searchString + "\".");
+                tvMessage.setText("No user matchings");
                 tvMessage.setVisibility(View.VISIBLE);
                 tvMessage.bringToFront();
             } else if (integer == 1) {
                 refreshList(SEARCH_BY_NAME);
+            } else if (integer == 2) {
+                refreshList(SEARCH_REC);
             }
         }
     }

@@ -17,6 +17,7 @@ import android.widget.TextView;
 import my.edu.tarc.kusm_wa14student.communechat.LoginActivity;
 import my.edu.tarc.kusm_wa14student.communechat.R;
 import my.edu.tarc.kusm_wa14student.communechat.internal.ContactDBHandler;
+import my.edu.tarc.kusm_wa14student.communechat.internal.MessageService;
 import my.edu.tarc.kusm_wa14student.communechat.internal.MqttHelper;
 import my.edu.tarc.kusm_wa14student.communechat.model.User;
 
@@ -81,18 +82,7 @@ public class UserTabFragment extends Fragment {
         tv_ContactNum = rootView.findViewById(R.id.textView_userfrag_number_of_friends);
         tv_Logout = rootView.findViewById(R.id.textView_userfrag_logout);
 
-        tv_Username.setText("ID: " + user.getUsername());
-        tv_Nickname.setText(user.getNickname());
-        tv_Status.setText(user.getStatus());
-        db = new ContactDBHandler(getContext(), ContactDBHandler.CONTACT_DATABASE);
-        tv_ContactNum.setText("" + db.getContactsCount());
-
-        if (user.getGender() == TYPE_MALE) {
-            iv_Gender.setImageDrawable(getResources().getDrawable(R.drawable.ic_boys));
-        }
-        if (user.getGender() == TYPE_FEMALE) {
-            iv_Gender.setImageDrawable(getResources().getDrawable(R.drawable.ic_girls));
-        }
+        renderView();
 
         tv_Logout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,11 +94,7 @@ public class UserTabFragment extends Fragment {
                         .setPositiveButton(Html.fromHtml("<font color='#8f1ffc'>OK</font>"), new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 if (pref.edit().clear().commit()) {
-                                    Intent intent = new Intent(getActivity(), LoginActivity.class);
-                                    startActivity(intent);
-                                    getActivity().finish();
-                                    MqttHelper.disconnect();
-                                    MqttHelper.startMqtt(getActivity().getApplicationContext());
+                                    resetApplication();
                                 }
                             }
                         })
@@ -117,6 +103,38 @@ public class UserTabFragment extends Fragment {
         });
 
         return rootView;
+    }
+
+    private void renderView() {
+        tv_Username.setText("ID: " + user.getUsername());
+        tv_Nickname.setText(user.getNickname());
+        tv_Status.setText(user.getStatus());
+        db = new ContactDBHandler(getContext());
+
+        tv_ContactNum.setText("" + db.getContactsCount(db.TABLE_CONTACTS));
+
+        if (user.getGender() == TYPE_MALE) {
+            iv_Gender.setImageDrawable(getResources().getDrawable(R.drawable.ic_boys));
+        }
+        if (user.getGender() == TYPE_FEMALE) {
+            iv_Gender.setImageDrawable(getResources().getDrawable(R.drawable.ic_girls));
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        renderView();
+    }
+
+    private void resetApplication() {
+        Intent intent = new Intent(getActivity(), LoginActivity.class);
+        startActivity(intent);
+        getActivity().finish();
+        MqttHelper.disconnect();
+        getActivity().stopService(new Intent(getActivity(), MessageService.class));
+        ContactDBHandler db = new ContactDBHandler(getActivity().getApplicationContext());
+        db.clearDatabase();
     }
 
 

@@ -22,7 +22,7 @@ public class SearchTabFragment extends Fragment {
 
     //Views
     private EditText etSearch;
-    private Button btnCategory, btnRecommend, btnNearby, btnChat;
+    private Button btnCategory, btnRecommend, btnNearby, btnChat, btnFriendRequest;
 
 
     public SearchTabFragment() {
@@ -40,6 +40,7 @@ public class SearchTabFragment extends Fragment {
         btnRecommend = rootView.findViewById(R.id.btn_search_recommendation);
         btnNearby = rootView.findViewById(R.id.btn_search_nearby);
         btnChat = rootView.findViewById(R.id.btn_search_localchat);
+        btnFriendRequest = rootView.findViewById(R.id.btn_search_friend_request);
 
         final Animation onClickAnimation = new AlphaAnimation(0.3f, 1.0f);
         onClickAnimation.setDuration(1000);
@@ -90,6 +91,22 @@ public class SearchTabFragment extends Fragment {
 
                 Fragment fragment = new SearchResultFragment();
                 fragment.setArguments(args);
+
+                FragmentTransaction ft = getFragmentManager().beginTransaction();
+                ft.setCustomAnimations(R.anim.slide_up, R.anim.down_from_top, R.anim.slide_up, R.anim.slide_left);
+                ft.add(R.id.main_frame, fragment)
+                        .addToBackStack("search_result_fragment")
+                        .commit();
+            }
+        });
+
+        btnFriendRequest.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                view.startAnimation(onClickAnimation);
+
+                Bundle args = new Bundle();
+                Fragment fragment = new FriendRequestFragment();
 
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
                 ft.setCustomAnimations(R.anim.slide_up, R.anim.down_from_top, R.anim.slide_up, R.anim.slide_left);

@@ -34,8 +34,8 @@
             android:backgroundTint="@color/colorPrimary"
             android:elevation="6dp"
             android:orientation="horizontal"
-            android:paddingLeft="@dimen/small_margin"
-            android:paddingRight="@dimen/small_margin">
+            android:paddingLeft="@dimen/xtra_small_margin"
+            android:paddingRight="@dimen/xtra_small_margin">
 
             <FrameLayout
                 android:layout_width="0dp"
@@ -114,16 +114,16 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginBottom="@dimen/medium_margin"
-                android:layout_marginStart="@dimen/medium_margin"
-                android:layout_marginTop="@dimen/medium_margin"
+                android:layout_marginBottom="@dimen/small_margin"
+                android:layout_marginStart="@dimen/small_margin"
+                android:layout_marginTop="@dimen/small_margin"
                 android:layout_weight="5"
                 android:background="@drawable/round_frame"
                 android:hint="@string/send_message"
                 android:maxHeight="@dimen/send_message_frame_maxHeight"
                 android:minHeight="@dimen/send_message_frame_height"
-                android:paddingLeft="@dimen/small_margin"
-                android:paddingRight="@dimen/small_margin"
+                android:paddingLeft="@dimen/xtra_small_margin"
+                android:paddingRight="@dimen/xtra_small_margin"
                 android:textSize="@dimen/text_message_body_size" />
 
             <Button
@@ -131,9 +131,9 @@
                 android:layout_width="0dp"
                 android:layout_height="@dimen/send_message_frame_height"
                 android:layout_gravity="bottom"
-                android:layout_marginEnd="@dimen/medium_margin"
-                android:layout_marginStart="@dimen/medium_margin"
-                android:layout_marginTop="@dimen/medium_margin"
+                android:layout_marginEnd="@dimen/small_margin"
+                android:layout_marginStart="@dimen/small_margin"
+                android:layout_marginTop="@dimen/small_margin"
                 android:layout_weight="1"
                 android:background="@drawable/round_frame"
                 android:backgroundTint="@color/colorCombination5"

@@ -46,6 +46,7 @@ public class ProfileActivity extends AppCompatActivity {
     private String message = "";
     private Contact contact;
     private ContactDBHandler contactDb;
+    private final String TABLE_NAME = contactDb.TABLE_CACHE;
 
     //Views
     private TextView tvNickname, tvUsername, tvMessage;
@@ -66,7 +67,7 @@ public class ProfileActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_profile);
-        contactDb = new ContactDBHandler(getApplicationContext(), ContactDBHandler.CACHE_DATABASE);
+        contactDb = new ContactDBHandler(getApplicationContext());
         //Register to listen broadcast message
         LocalBroadcastManager.getInstance(this).registerReceiver(
                 mMessageReceiver, new IntentFilter("MessageEvent"));
@@ -111,15 +112,15 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void loadContact(String fid) {
-        if (contactDb.isContactExists(fid)) {
-            contact = contactDb.getContact(fid);
-            refreshProfileDetails();
+        if (contactDb.isContactExists(fid, TABLE_NAME)) {
+            contact = contactDb.getContact(fid, TABLE_NAME);
+            renderView();
             runSearchByNameTask(fid, TYPE_EXISTS);
         } else
             runSearchByNameTask(fid, TYPE_NOT_EXISTS);
     }
 
-    private void refreshProfileDetails() {
+    private void renderView() {
         tvNickname.setText(contact.getNickname());
         tvUsername.setText("ID: " + contact.getUsername());
 
@@ -183,7 +184,7 @@ public class ProfileActivity extends AppCompatActivity {
                         WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             }
             handler.encode(MqttMessageHandler.MqttCommand.REQ_CONTACT_DETAILS, this.uid);
-            MqttHelper.publish(MqttHelper.getUserTopic(), handler.getPublish());
+            MqttHelper.publish(MqttHelper.getPublishTopic(), handler.getPublish());
         }
 
         @Override
@@ -198,8 +199,8 @@ public class ProfileActivity extends AppCompatActivity {
                             if (handler.mqttCommand == MqttMessageHandler.MqttCommand.ACK_CONTACT_DETAILS) {
                                 contact = handler.getContactDetails();
                                 if (type == TYPE_NOT_EXISTS)
-                                    contactDb.addContact(contact);
-                                contactDb.updateSingleContact(contact);
+                                    contactDb.addContact(contact, TABLE_NAME);
+                                contactDb.updateSingleContact(contact, TABLE_NAME);
                                 return 1;
                             }
                         } else {
@@ -229,7 +230,7 @@ public class ProfileActivity extends AppCompatActivity {
                 });
             }
             if (integer == 1) {
-                refreshProfileDetails();
+                renderView();
             }
         }
     }

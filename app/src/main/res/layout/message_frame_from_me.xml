@@ -23,7 +23,7 @@
         android:id="@+id/text_message_time_from_me"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/small_margin"
+        android:layout_marginEnd="@dimen/xtra_small_margin"
         android:text="11:40"
         android:textSize="@dimen/text_message_time_size"
         app:layout_constraintBottom_toBottomOf="@+id/text_message_body_from_me"

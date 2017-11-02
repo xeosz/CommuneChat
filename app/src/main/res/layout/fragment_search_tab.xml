@@ -28,7 +28,8 @@
                     android:layout_width="@dimen/small_icon"
                     android:layout_height="@dimen/small_icon"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_search" />
+                    android:src="@drawable/ic_search"
+                    android:tint="@android:color/black" />
             </FrameLayout>
 
             <EditText
@@ -60,40 +61,82 @@
             android:textColor="@android:color/white" />
 
         <Button
-            android:id="@+id/btn_search_nearby"
+            android:id="@+id/btn_search_friend_request"
             style="@style/Widget.AppCompat.Button.Borderless"
             android:layout_width="match_parent"
             android:layout_height="@dimen/item_height"
             android:layout_below="@+id/btn_search_category"
-            android:layout_marginTop="@dimen/small_margin"
+            android:layout_marginTop="@dimen/xtra_small_margin"
             android:background="@color/colorCombination2"
-            android:text="@string/search_nearby"
+            android:text="@string/friend_request"
             android:textAllCaps="false"
             android:textColor="@android:color/white" />
 
-        <Button
-            android:id="@+id/btn_search_recommendation"
-            style="@style/Widget.AppCompat.Button.Borderless"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/item_height"
-            android:layout_below="@+id/btn_search_nearby"
-            android:layout_marginTop="@dimen/small_margin"
-            android:background="@color/colorCombination3"
-            android:text="@string/search_recommend"
-            android:textAllCaps="false"
-            android:textColor="@android:color/white" />
+            android:layout_height="@dimen/xtra_large_button"
+            android:layout_below="@+id/btn_search_friend_request"
+            android:layout_marginTop="@dimen/xtra_small_margin"
+            android:orientation="horizontal">
 
-        <Button
-            android:id="@+id/btn_search_localchat"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/item_height"
-            android:layout_below="@+id/btn_search_recommendation"
-            android:layout_marginTop="@dimen/small_margin"
-            android:background="@color/colorCombination4"
-            android:text="@string/search_localchat"
-            android:textAllCaps="false"
-            android:textColor="@android:color/white" />
+            <Button
+                android:id="@+id/btn_search_nearby"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/xtra_small_margin"
+                android:layout_marginStart="@dimen/xtra_small_margin"
+                android:layout_weight="1"
+                android:background="@color/colorCombination3"
+                android:drawableTint="@android:color/white"
+                android:drawableTop="@drawable/ic_location"
+                android:gravity="center_horizontal|bottom"
+                android:paddingBottom="@dimen/small_margin"
+                android:paddingEnd="@dimen/xtra_small_margin"
+                android:paddingStart="@dimen/xtra_small_margin"
+                android:paddingTop="@dimen/medium_margin"
+                android:text="@string/search_nearby"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white" />
 
+            <Button
+                android:id="@+id/btn_search_recommendation"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@color/colorCombination4"
+                android:drawableTint="@android:color/white"
+                android:drawableTop="@drawable/ic_user_checked"
+                android:gravity="center_horizontal|bottom"
+                android:paddingBottom="@dimen/small_margin"
+                android:paddingEnd="@dimen/xtra_small_margin"
+                android:paddingStart="@dimen/xtra_small_margin"
+                android:paddingTop="@dimen/medium_margin"
+                android:text="@string/search_recommend"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/btn_search_localchat"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="@dimen/xtra_small_margin"
+                android:layout_marginStart="@dimen/xtra_small_margin"
+                android:layout_weight="1"
+                android:background="@color/colorCombination5"
+                android:drawableTint="@android:color/white"
+                android:drawableTop="@drawable/ic_chat_bubbles"
+                android:gravity="center_horizontal|bottom"
+                android:paddingBottom="@dimen/small_margin"
+                android:paddingEnd="@dimen/xtra_small_margin"
+                android:paddingStart="@dimen/xtra_small_margin"
+                android:paddingTop="@dimen/medium_margin"
+                android:text="@string/search_localchat"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white" />
+
+        </LinearLayout>
     </RelativeLayout>
 </ScrollView>
