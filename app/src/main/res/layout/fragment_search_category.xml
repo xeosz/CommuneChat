@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorBackground">
+
+    <TextView
+        android:id="@+id/textView_search_category_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:textAlignment="center"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="@dimen/medium_text"
+        android:visibility="invisible" />
+
+    <ProgressBar
+        android:id="@+id/progressBar_search_category"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize"
+            android:background="@drawable/bottom_border"
+            android:elevation="6dp"
+            android:orientation="horizontal"
+            android:paddingLeft="@dimen/xtra_small_margin"
+            android:paddingRight="@dimen/xtra_small_margin">
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageButton
+                    android:id="@+id/btn_search_category_back"
+                    android:layout_width="@dimen/up_button_size"
+                    android:layout_height="@dimen/up_button_size"
+                    android:layout_gravity="center"
+                    android:background="@drawable/ic_arrow_back"
+                    android:backgroundTint="@android:color/black" />
+
+            </FrameLayout>
+
+            <RelativeLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="6">
+
+                <TextView
+                    android:id="@+id/textView_search_category_title"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:clickable="false"
+                    android:singleLine="true"
+                    android:textAlignment="textStart"
+                    android:textAllCaps="false"
+                    android:textSize="@dimen/medium_text" />
+
+            </RelativeLayout>
+        </LinearLayout>
+
+        <ListView
+            android:id="@+id/listView_search_category"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="1dp"
+            android:layout_weight="1">
+
+        </ListView>
+
+        <Button
+            android:id="@+id/button3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Button" />
+
+    </LinearLayout>
+</RelativeLayout>

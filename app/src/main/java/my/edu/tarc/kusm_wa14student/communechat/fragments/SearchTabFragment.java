@@ -90,10 +90,10 @@ public class SearchTabFragment extends Fragment {
                 view.startAnimation(onClickAnimation);
 
                 Bundle args = new Bundle();
-                args.putString("TITLE", "PASS");
+                args.putString("TITLE", "Search By Category");
                 args.putInt("TYPE", SEARCH_CATEGORY);
 
-                Fragment fragment = new SearchResultFragment();
+                Fragment fragment = new SearchCategoryFragment();
                 fragment.setArguments(args);
 
                 FragmentTransaction ft = getFragmentManager().beginTransaction();

@@ -31,6 +31,17 @@ public class MqttMessageHandler {
     private static String ACK_FRIEND_REQUEST_LIST = "003823";
     private static String REQ_RESPONSE_FRIEND_REQUEST = "003824";
     private static String ACK_RESPONSE_FRIEND_REQUEST = "003825";
+    //Search category flow, dynamically retrieve available records from database
+    private static String REQ_SEARCH_CATEGORY_FACULTY = "003826";
+    private static String ACK_SEARCH_CATEGORY_FACULTY = "003827";
+    private static String REQ_SEARCH_CATEGORY_YEAR = "003828";
+    private static String ACK_SEARCH_CATEGORY_YEAR = "003829";
+    private static String REQ_SEARCH_CATEGORY_SESSION = "003830";
+    private static String ACK_SEARCH_CATEGORY_SESSION = "003831";
+    private static String REQ_SEARCH_CATEGORY_COURSES = "003832";
+    private static String ACK_SEARCH_CATEGORY_COURSES = "003833";
+    private static String REQ_SEARCH_CATEGORY_GROUP = "003834";
+    private static String ACK_SEARCH_CATEGORY_GROUP = "003835";
     private static String KEEP_ALIVE = "003999";
 
     public MqttCommand mqttCommand;
@@ -133,6 +144,36 @@ public class MqttMessageHandler {
                 result = sb.toString();
                 break;
             }
+            case REQ_SEARCH_CATEGORY_FACULTY: {
+                sb.append(REQ_SEARCH_CATEGORY_FACULTY
+                        + RESERVED_STRING);
+                result = sb.toString();
+                break;
+            }
+            case REQ_SEARCH_CATEGORY_YEAR: {
+                sb.append(REQ_SEARCH_CATEGORY_YEAR
+                        + RESERVED_STRING);
+                result = sb.toString();
+                break;
+            }
+            case REQ_SEARCH_CATEGORY_SESSION: {
+                sb.append(REQ_SEARCH_CATEGORY_SESSION
+                        + RESERVED_STRING);
+                result = sb.toString();
+                break;
+            }
+            case REQ_SEARCH_CATEGORY_COURSES: {
+                sb.append(REQ_SEARCH_CATEGORY_COURSES
+                        + RESERVED_STRING);
+                result = sb.toString();
+                break;
+            }
+            case REQ_SEARCH_CATEGORY_GROUP: {
+                sb.append(REQ_SEARCH_CATEGORY_GROUP
+                        + RESERVED_STRING);
+                result = sb.toString();
+                break;
+            }
             case KEEP_ALIVE: {
                 String[] update = (String[]) data;
                 sb.append(KEEP_ALIVE
@@ -180,6 +221,22 @@ public class MqttMessageHandler {
 
             } else if (data.equalsIgnoreCase(ACK_RESPONSE_FRIEND_REQUEST)) {
                 this.mqttCommand = MqttCommand.ACK_RESPONSE_FRIEND_REQUEST;
+
+            } else if (data.equalsIgnoreCase(ACK_SEARCH_CATEGORY_FACULTY)) {
+                this.mqttCommand = MqttCommand.ACK_SEARCH_CATEGORY_FACULTY;
+
+            } else if (data.equalsIgnoreCase(ACK_SEARCH_CATEGORY_YEAR)) {
+                this.mqttCommand = MqttCommand.ACK_SEARCH_CATEGORY_YEAR;
+
+            } else if (data.equalsIgnoreCase(ACK_SEARCH_CATEGORY_SESSION)) {
+                this.mqttCommand = MqttCommand.ACK_SEARCH_CATEGORY_SESSION;
+
+            } else if (data.equalsIgnoreCase(ACK_SEARCH_CATEGORY_COURSES)) {
+                this.mqttCommand = MqttCommand.ACK_SEARCH_CATEGORY_COURSES;
+
+            } else if (data.equalsIgnoreCase(ACK_SEARCH_CATEGORY_GROUP)) {
+                this.mqttCommand = MqttCommand.ACK_SEARCH_CATEGORY_GROUP;
+
             } else
                 this.mqttCommand = null;
         }
@@ -482,6 +539,7 @@ public class MqttMessageHandler {
         return contacts;
     }
 
+
     protected boolean isReceiving() {
         return (this.mqttCommand == MqttCommand.ACK_AUTHENTICATION ||
                 this.mqttCommand == MqttCommand.ACK_CONTACT_LIST ||
@@ -491,7 +549,12 @@ public class MqttMessageHandler {
                 this.mqttCommand == MqttCommand.ACK_FRIEND_REQUEST ||
                 this.mqttCommand == MqttCommand.ACK_FRIEND_REQUEST_LIST ||
                 this.mqttCommand == MqttCommand.ACK_RECOMMEND_FRIENDS ||
-                this.mqttCommand == MqttCommand.ACK_RESPONSE_FRIEND_REQUEST);
+                this.mqttCommand == MqttCommand.ACK_RESPONSE_FRIEND_REQUEST ||
+                this.mqttCommand == MqttCommand.ACK_SEARCH_CATEGORY_FACULTY ||
+                this.mqttCommand == MqttCommand.ACK_SEARCH_CATEGORY_YEAR ||
+                this.mqttCommand == MqttCommand.ACK_SEARCH_CATEGORY_SESSION ||
+                this.mqttCommand == MqttCommand.ACK_SEARCH_CATEGORY_COURSES ||
+                this.mqttCommand == MqttCommand.ACK_SEARCH_CATEGORY_GROUP);
     }
 
     public enum MqttCommand {
@@ -513,6 +576,16 @@ public class MqttMessageHandler {
         ACK_SEARCH_USER,
         REQ_RECOMMEND_FRIENDS,
         ACK_RECOMMEND_FRIENDS,
+        REQ_SEARCH_CATEGORY_FACULTY,
+        ACK_SEARCH_CATEGORY_FACULTY,
+        REQ_SEARCH_CATEGORY_YEAR,
+        ACK_SEARCH_CATEGORY_YEAR,
+        REQ_SEARCH_CATEGORY_SESSION,
+        ACK_SEARCH_CATEGORY_SESSION,
+        REQ_SEARCH_CATEGORY_COURSES,
+        ACK_SEARCH_CATEGORY_COURSES,
+        REQ_SEARCH_CATEGORY_GROUP,
+        ACK_SEARCH_CATEGORY_GROUP,
         KEEP_ALIVE;
     }
 

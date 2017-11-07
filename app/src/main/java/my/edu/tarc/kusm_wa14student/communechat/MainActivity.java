@@ -214,8 +214,9 @@ public class MainActivity extends AppCompatActivity {
         if (fragment != null && fragment instanceof SearchResultFragment) {
             ft.setCustomAnimations(R.anim.slide_up, R.anim.slide_left, R.anim.slide_up, R.anim.slide_left);
             ft.remove(fragment).commit();
-        } else
+        } else {
             super.onBackPressed();
+        }
     }
 
     static class BottomNavigationViewHelper {
