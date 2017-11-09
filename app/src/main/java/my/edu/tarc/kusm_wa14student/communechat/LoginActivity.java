@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -76,6 +77,7 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin = (Button) findViewById(R.id.button_login);
         progressBar = (ProgressBar) findViewById(R.id.progressBar_login);
         progressBar.setVisibility(View.INVISIBLE);
+        progressBar.getIndeterminateDrawable().setColorFilter(Color.parseColor("#8f1ffc"), android.graphics.PorterDuff.Mode.MULTIPLY);
 
         etPassword.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override

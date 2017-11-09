@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.database.DataSetObserver;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -102,6 +103,7 @@ public class ContactTabFragment extends Fragment {
         contactListView = rootView.findViewById(R.id.listView_contact);
         progressBar = rootView.findViewById(R.id.progressBar_contact_fragment);
         progressBar.setVisibility(View.INVISIBLE);
+        progressBar.getIndeterminateDrawable().setColorFilter(Color.parseColor("#8f1ffc"), android.graphics.PorterDuff.Mode.MULTIPLY);
         adapter = new CustomAdapter(contacts, 0, getActivity());
         contactListView.setLayoutAnimation(new LayoutAnimationController(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_in), 0.3f));
         contactListView.setAdapter(adapter);
@@ -175,6 +177,7 @@ public class ContactTabFragment extends Fragment {
     private void checkContent(ArrayList contacts) {
         if (!contacts.isEmpty()) {
             tvMain.setVisibility(View.INVISIBLE);
+            progressBar.setVisibility(View.GONE);
         } else {
             tvMain.setText("Opps! No contact at the moment.");
             tvMain.setVisibility(View.VISIBLE);

@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -108,7 +109,7 @@ public class ProfileActivity extends AppCompatActivity {
         progressBar = (ProgressBar) findViewById(R.id.progressBar_profile);
         tvMessage = (TextView) findViewById(R.id.textView_user_profile_message);
         frame = (FrameLayout) findViewById(R.id.frame_user_profile);
-
+        progressBar.getIndeterminateDrawable().setColorFilter(Color.parseColor("#8f1ffc"), android.graphics.PorterDuff.Mode.MULTIPLY);
         final Animation onClickAnimation = new AlphaAnimation(0.3f, 1.0f);
         onClickAnimation.setDuration(1000);
 

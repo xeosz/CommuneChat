@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -104,6 +105,7 @@ public class SearchCategoryFragment extends Fragment {
         tvMessage = rootView.findViewById(R.id.textView_search_category_message);
         tvSelect = rootView.findViewById(R.id.textView_search_category_select_title);
         progressBar = rootView.findViewById(R.id.progressBar_search_category);
+        progressBar.getIndeterminateDrawable().setColorFilter(Color.parseColor("#8f1ffc"), android.graphics.PorterDuff.Mode.MULTIPLY);
         ibBack = rootView.findViewById(R.id.btn_search_category_back);
         lvResult = rootView.findViewById(R.id.listView_search_category);
 

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -88,7 +89,7 @@ public class FriendRequestFragment extends Fragment {
         ibBack = rootView.findViewById(R.id.btn_contact_request_back);
         lvRequest = rootView.findViewById(R.id.listView_contact_request);
         progressBar = rootView.findViewById(R.id.progressBar_contact_request);
-
+        progressBar.getIndeterminateDrawable().setColorFilter(Color.parseColor("#8f1ffc"), android.graphics.PorterDuff.Mode.MULTIPLY);
         onClickAnimation = new AlphaAnimation(0.3f, 1.0f);
         onClickAnimation.setDuration(1000);
 

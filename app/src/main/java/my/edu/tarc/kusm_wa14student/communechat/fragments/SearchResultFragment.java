@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -108,6 +109,7 @@ public class SearchResultFragment extends Fragment {
         tvMessage = rootView.findViewById(R.id.textView_searchresult_message);
         progressBar = rootView.findViewById(R.id.progressBar_searchresult);
         progressBar.setVisibility(View.INVISIBLE);
+        progressBar.getIndeterminateDrawable().setColorFilter(Color.parseColor("#8f1ffc"), android.graphics.PorterDuff.Mode.MULTIPLY);
         container = rootView.findViewById(R.id.searchresult_actionbar_editable);
 
         final Animation onClickAnimation = new AlphaAnimation(0.3f, 1.0f);

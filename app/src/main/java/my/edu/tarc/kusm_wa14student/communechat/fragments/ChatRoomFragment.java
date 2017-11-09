@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -85,6 +86,7 @@ public class ChatRoomFragment extends Fragment {
         ibMoreOp = rootView.findViewById(R.id.imageButton_chatroom_setting);
         ibBack = rootView.findViewById(R.id.imageButton_chatroom_back);
         progressBar = rootView.findViewById(R.id.progressBar_chatroom);
+        progressBar.getIndeterminateDrawable().setColorFilter(Color.parseColor("#8f1ffc"), android.graphics.PorterDuff.Mode.MULTIPLY);
 
         final Animation onClickAnimation = new AlphaAnimation(0.3f, 1.0f);
         onClickAnimation.setDuration(1000);

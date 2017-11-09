@@ -130,11 +130,11 @@ public class UserTabFragment extends Fragment {
     private void resetApplication() {
         //Clear Shared preferences and Database records
         Intent intent = new Intent(getActivity(), LoginActivity.class);
-        startActivity(intent);
         getActivity().finish();
         getActivity().stopService(new Intent(getActivity(), MessageService.class));
         ContactDBHandler db = new ContactDBHandler(getActivity().getApplicationContext());
         db.clearDatabase();
+        startActivity(intent);
     }
 
 
