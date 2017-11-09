@@ -19,6 +19,10 @@ import static org.eclipse.paho.client.mqttv3.MqttConnectOptions.KEEP_ALIVE_INTER
 
 /**
  * Created by Xeosz on 24-Sep-17.
+ *
+ * ***ATTENTION***
+ *  MQTT will only callback to one of the MQTT Android Client with same ClientID
+ *  Do not create/start multiple MQTT connection / MqttAndroidClient
  */
 
 public final class MqttHelper {

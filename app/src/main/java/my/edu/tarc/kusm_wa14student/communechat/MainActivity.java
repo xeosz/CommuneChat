@@ -37,7 +37,7 @@ import my.edu.tarc.kusm_wa14student.communechat.internal.MqttMessageHandler;
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private static final int LOCATION_REQUEST_CODE = 1;
-    private static final long KEEPALIVE_INTERVAL = 30000; //ms
+    private static final long KEEPALIVE_INTERVAL = 30000; //30seconds
 
     //CustomViewPagerAdapter Variables;
     private ViewPagerAdapter adapter;
@@ -86,14 +86,20 @@ public class MainActivity extends AppCompatActivity {
         searchTabFragment = new SearchTabFragment();
         userTabFragment = new UserTabFragment();
 
+        //Viewpager adapter
         adapter.addFragment(contactTabFragment);
         adapter.addFragment(chatTabFragment);
         adapter.addFragment(searchTabFragment);
         adapter.addFragment(userTabFragment);
 
+        //Clear the zoom animation in BottomNavigationBar
         BottomNavigationViewHelper.removeShiftMode(bottomNavView);
 
+        //Set the viewpager page limit.
+        //Used for retain screen state.
         viewPager.setOffscreenPageLimit(NUMBER_OF_SCREENS);
+
+        //Transition between the 4 main fragments in viewpager.
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -147,7 +153,9 @@ public class MainActivity extends AppCompatActivity {
                 return false;
             }
         });
+
         checkLocationPermission();
+
         viewPager.setAdapter(adapter);
     }
 
@@ -159,16 +167,22 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+
+        //Stop the locationUpdate task
         keepAliveHandler.removeCallbacks(keepAliveTask);
     }
 
     private void keepAliveUpdate() {
         keepAliveHandler = new Handler();
         updateLocation();
+
+        //Periodically invokes the updateLocation()
+        //Change KEEPALIVE_INTERVAL for update interval
         keepAliveHandler.postDelayed(keepAliveTask, KEEPALIVE_INTERVAL);
     }
 
     private void updateLocation() {
+        //Upload current user location & online time to the server.
         gps = new GPSTracker(MainActivity.this);
         if (gps.canGetLocation()) {
             String latitude = df.format(gps.getLatitude());
@@ -209,6 +223,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+
+        //Check if any child fragments is in the back stack.
+        //To prevent the activity close on back pressed.
         Fragment fragment = getSupportFragmentManager().findFragmentByTag("search_result_fragment");
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         if (fragment != null && fragment instanceof SearchResultFragment) {
@@ -217,9 +234,11 @@ public class MainActivity extends AppCompatActivity {
         } else {
             super.onBackPressed();
         }
+
     }
 
-    static class BottomNavigationViewHelper {
+    private static class BottomNavigationViewHelper {
+        //Do not change anything in this class
 
         static void removeShiftMode(BottomNavigationView view) {
             BottomNavigationMenuView menuView = (BottomNavigationMenuView) view.getChildAt(0);

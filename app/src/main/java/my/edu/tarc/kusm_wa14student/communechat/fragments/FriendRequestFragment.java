@@ -42,6 +42,8 @@ public class FriendRequestFragment extends Fragment {
     private static final long TASK_TIMEOUT = 8000;
     private static final int FRIEND_LIST_LOAD = 1;
     private static final int FRIEND_LIST_FRIEND_REQUEST_RESPONSE = 2;
+    private static final String TITLE = "Friend Request";
+    private static final String FID_KEY = "FID";
 
     //Views
     private TextView tvTitle, tvMessage;
@@ -90,7 +92,7 @@ public class FriendRequestFragment extends Fragment {
         onClickAnimation = new AlphaAnimation(0.3f, 1.0f);
         onClickAnimation.setDuration(1000);
 
-        tvTitle.setText("Friend Requests");
+        tvTitle.setText(TITLE);
         lvRequest.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -100,7 +102,7 @@ public class FriendRequestFragment extends Fragment {
                 Contact tempContact = (Contact) lvRequest.getItemAtPosition(i);
                 Bundle bundle = new Bundle();
 
-                bundle.putString("FID", String.valueOf(tempContact.getUid()));
+                bundle.putString(FID_KEY, String.valueOf(tempContact.getUid()));
 
                 intent.putExtras(bundle);
                 getActivity().startActivity(intent);
@@ -300,7 +302,7 @@ public class FriendRequestFragment extends Fragment {
                     Intent intent = new Intent(getActivity(), ProfileActivity.class);
                     Bundle bundle = new Bundle();
 
-                    bundle.putString("FID", String.valueOf(contact.getUid()));
+                    bundle.putString(FID_KEY, String.valueOf(contact.getUid()));
 
                     intent.putExtras(bundle);
                     getActivity().startActivity(intent);

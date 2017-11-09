@@ -119,16 +119,10 @@ public class ContactDBHandler extends SQLiteOpenHelper {
     public boolean isContactExists(String uid, String tableName) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(tableName,
-                new String[]{KEY_ID, KEY_USERNAME, KEY_NICKNAME, KEY_GENDER, KEY_STATUS, KEY_LAST_ONLINE}, KEY_ID + "=?",
+                new String[]{KEY_ID}, KEY_ID + "=?",
                 new String[]{String.valueOf(uid)}, null, null, null, null);
         if (cursor.getCount() > 0
                 && cursor.moveToFirst()) {
-            if (cursor.getInt(0) != 0
-                    && !cursor.getString(1).isEmpty()
-                    && !cursor.getString(2).isEmpty()
-                    && cursor.getInt(3) != 0
-                    && !cursor.getString(4).isEmpty()
-                    && cursor.getInt(5) != 0)
                 return true;
         }
         return false;

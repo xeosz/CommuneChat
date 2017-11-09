@@ -37,8 +37,9 @@ import my.edu.tarc.kusm_wa14student.communechat.model.Contact;
 import my.edu.tarc.kusm_wa14student.communechat.model.User;
 
 public class ContactTabFragment extends Fragment {
+
     private static final long TASK_TIMEOUT = 6000;
-    UpdateListTask task;
+
     //ListViewAdapter variables
     private ArrayList<Contact> contacts = new ArrayList<>();
     private CustomAdapter adapter;
@@ -54,6 +55,7 @@ public class ContactTabFragment extends Fragment {
     private SharedPreferences.Editor editor;
     private ContactDBHandler db;
     private String TABLE_NAME = db.TABLE_CONTACTS;
+
     private String message = "";
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
@@ -64,14 +66,6 @@ public class ContactTabFragment extends Fragment {
 
     public ContactTabFragment() {
         // Required empty public constructor
-    }
-
-    public static void clearAsyncTask(AsyncTask<?, ?, ?> asyncTask) {
-        if (asyncTask != null) {
-            if (!asyncTask.isCancelled()) {
-                asyncTask.cancel(true);
-            }
-        }
     }
 
     @Override
@@ -92,7 +86,6 @@ public class ContactTabFragment extends Fragment {
         contacts = new ArrayList<>();
         user = new User();
 
-
         //Share preferences
         pref = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
         editor = pref.edit();
@@ -100,12 +93,11 @@ public class ContactTabFragment extends Fragment {
             user.setUid(pref.getInt("uid", 0));
         }
 
-        //Listen to message
+        //Listen to MessageService
         LocalBroadcastManager.getInstance(getActivity()).registerReceiver(
                 mMessageReceiver, new IntentFilter("MessageEvent"));
 
-        // Inflate the layout for this fragment
-
+        //Inflate layout
         tvMain = rootView.findViewById(R.id.tv_contact_fragment);
         contactListView = rootView.findViewById(R.id.listView_contact);
         progressBar = rootView.findViewById(R.id.progressBar_contact_fragment);
@@ -129,7 +121,6 @@ public class ContactTabFragment extends Fragment {
         contactListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                //OnClick Animation
                 view.startAnimation(onClickAnimation);
 
                 Intent intent = new Intent(getActivity(), ProfileActivity.class);
@@ -142,6 +133,7 @@ public class ContactTabFragment extends Fragment {
                 getActivity().startActivity(intent);
             }
         });
+
         renderView();
         runUpdateTask(String.valueOf(user.getUid()));
         //Check list contents

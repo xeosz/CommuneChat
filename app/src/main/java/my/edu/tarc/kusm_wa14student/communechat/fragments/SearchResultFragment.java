@@ -331,11 +331,12 @@ public class SearchResultFragment extends Fragment {
     private class LoadingTask extends AsyncTask<Void, Void, Integer> {
 
         private MqttMessageHandler handler = new MqttMessageHandler();
-        private String[] searchString;
+        private String searchString;
+        private String[] searchStrings;
         private int type;
 
         private LoadingTask(String data, int type) {
-            this.searchString[0] = data;
+            this.searchString = data;
             this.type = type;
         }
 
@@ -344,7 +345,7 @@ public class SearchResultFragment extends Fragment {
         }
 
         private void put(String[] strings) {
-            this.searchString = strings;
+            this.searchStrings = strings;
         }
 
         @Override
@@ -355,19 +356,19 @@ public class SearchResultFragment extends Fragment {
             tvMessage.setText("");
             tvMessage.setVisibility(View.INVISIBLE);
             if (this.type == SEARCH_BY_NAME) {
-                handler.encode(MqttMessageHandler.MqttCommand.REQ_SEARCH_USER, searchString[0]);
+                handler.encode(MqttMessageHandler.MqttCommand.REQ_SEARCH_USER, searchString);
                 MqttHelper.publish(MqttHelper.getPublishTopic(), handler.getPublish());
                 contacts.clear();
             } else if (this.type == SEARCH_REC) {
-                handler.encode(MqttMessageHandler.MqttCommand.REQ_RECOMMEND_FRIENDS, searchString[0]);
+                handler.encode(MqttMessageHandler.MqttCommand.REQ_RECOMMEND_FRIENDS, searchString);
                 MqttHelper.publish(MqttHelper.getPublishTopic(), handler.getPublish());
                 contacts.clear();
             } else if (this.type == SEARCH_NEARBY) {
-                handler.encode(MqttMessageHandler.MqttCommand.REQ_NEARBY_FRIENDS, searchString[0]);
+                handler.encode(MqttMessageHandler.MqttCommand.REQ_NEARBY_FRIENDS, searchString);
                 MqttHelper.publish(MqttHelper.getPublishTopic(), handler.getPublish());
                 contacts.clear();
             } else if (this.type == SEARCH_CATEGORY_RESULT) {
-                handler.encode(MqttMessageHandler.MqttCommand.REQ_SEARCH_CATEGORY_MEMBER, searchString);
+                handler.encode(MqttMessageHandler.MqttCommand.REQ_SEARCH_CATEGORY_MEMBER, searchStrings);
                 MqttHelper.publish(MqttHelper.getPublishTopic(), handler.getPublish());
                 contacts.clear();
             }

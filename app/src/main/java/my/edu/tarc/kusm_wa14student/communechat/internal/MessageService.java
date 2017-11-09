@@ -58,6 +58,7 @@ public class MessageService extends Service {
             }
 
             //Mqtt Callback Handler
+            //Handle the received MQTT Message here
             MqttHelper.setCallback(new MqttCallbackExtended() {
 
                 @Override
@@ -97,6 +98,9 @@ public class MessageService extends Service {
     }
 
     private boolean appInForeground(@NonNull Context context) {
+        //Check if the App is opened or not.
+        //Returns true if App is in foreground, or running background in the phone
+        //Returns false if the App is killed.
         ActivityManager activityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningAppProcessInfo> runningAppProcesses = activityManager.getRunningAppProcesses();
         if (runningAppProcesses == null) {
@@ -120,6 +124,7 @@ public class MessageService extends Service {
 
     // Send an Intent with an action named "MessageEvent".
     // The Intent sent should be received by the registered ReceiverActivity.
+    // To broadcast the received MQTT messages to activities and fragments.
     private void sendMessage(String topic, String message) {
         Intent intent = new Intent("MessageEvent");
 

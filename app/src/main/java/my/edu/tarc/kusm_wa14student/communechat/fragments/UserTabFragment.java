@@ -7,7 +7,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.text.Html;
+import android.support.v7.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,7 +30,6 @@ public class UserTabFragment extends Fragment {
 
     private User user;
     private SharedPreferences pref;
-    private SharedPreferences.Editor editor;
     private ContactDBHandler db;
 
     public UserTabFragment() {
@@ -46,8 +45,8 @@ public class UserTabFragment extends Fragment {
 
         //Shared preferences
         pref = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext());
-        editor = pref.edit();
 
+        //!Redundant code, shall retrieve what is needed.
         if (pref != null) {
             user.setUid(pref.getInt("uid", 0));
             user.setNickname(pref.getString("nickname", null));
@@ -86,18 +85,20 @@ public class UserTabFragment extends Fragment {
         tv_Logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new AlertDialog.Builder(getActivity())
+                ContextThemeWrapper ctw = new ContextThemeWrapper(getActivity(), R.style.AlertDialogStyle);
+                new AlertDialog.Builder(ctw)
                         .setTitle("Log Out")
                         .setMessage("Do you really want to log out?")
                         .setIcon(android.R.drawable.ic_lock_power_off)
-                        .setPositiveButton(Html.fromHtml("<font color='#8f1ffc'>OK</font>"), new DialogInterface.OnClickListener() {
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 if (pref.edit().clear().commit()) {
                                     resetApplication();
                                 }
                             }
                         })
-                        .setNegativeButton(Html.fromHtml("<font color='#8f1ffc'>Cancel</font>"), null).show();
+                        .setNegativeButton("Cancel", null)
+                        .show();
             }
         });
 
@@ -127,6 +128,7 @@ public class UserTabFragment extends Fragment {
     }
 
     private void resetApplication() {
+        //Clear Shared preferences and Database records
         Intent intent = new Intent(getActivity(), LoginActivity.class);
         startActivity(intent);
         getActivity().finish();

@@ -7,12 +7,20 @@ import my.edu.tarc.kusm_wa14student.communechat.model.User;
 
 /**
  * Created by Xeosz on 27-Sep-17.
+ * SC-Commune Chat System
+ * Command Range 003801 - 004000 + 24 reserved characters.
+ *
+ *      When adding a new command, specify the command string
+ *      Add the command name to MQTTCommand Enum
+ *      Update encode() for input to upload to server and design your handler for input data
+ *      Update decode() and isReceiving() for handling received message
+ *
  */
 
 public class MqttMessageHandler {
     private final static String RESERVED_STRING = "000000000000000000000000";
 
-    //Static Variables
+    //Mqtt Command String
     private static String REQ_AUTHENTICATION = "003801";
     private static String ACK_AUTHENTICATION = "003802";
     private static String REQ_CONTACT_LIST = "003810";
@@ -31,7 +39,10 @@ public class MqttMessageHandler {
     private static String ACK_FRIEND_REQUEST_LIST = "003823";
     private static String REQ_RESPONSE_FRIEND_REQUEST = "003824";
     private static String ACK_RESPONSE_FRIEND_REQUEST = "003825";
-    //Search category flow, dynamically retrieve available records from database
+
+    // Command flow for searching user by category
+    // retrieve available records from database
+    // 003826 to 003837
     private static String REQ_SEARCH_CATEGORY_FACULTY = "003826";
     private static String ACK_SEARCH_CATEGORY_FACULTY = "003827";
     private static String REQ_SEARCH_CATEGORY_YEAR = "003828";
@@ -44,25 +55,27 @@ public class MqttMessageHandler {
     private static String ACK_SEARCH_CATEGORY_GROUP = "003835";
     private static String REQ_SEARCH_CATEGORY_MEMBER = "003836";
     private static String ACK_SEARCH_CATEGORY_MEMBER = "003837";
+
     private static String KEEP_ALIVE = "003999";
 
     public MqttCommand mqttCommand;
     private String publish;
     private String received;
-    //FORMAT
-
-    //Command Range 003801 - 004000
-    //Reserved 24Bytes / 24Chars
 
     public MqttMessageHandler() {
     }
+
     public String getPublish() {
         return publish;
     }
+
     public void setReceived(String received) {
         this.received = received;
         this.decode(received);
     }
+
+    //After encode with MqttCommand and designed input data
+    //Get the publish messages from getPublish() to publish the messages
     public void encode(MqttCommand command, Object data) {
         StringBuilder sb = new StringBuilder();
         String result = null;
@@ -121,11 +134,12 @@ public class MqttMessageHandler {
                 break;
             }
             case REQ_FRIEND_REQUEST: {
-                String[] id = (String[]) data;
+                String[] str = (String[]) data;
                 sb.append(REQ_FRIEND_REQUEST
                         + RESERVED_STRING
-                        + id[0]
-                        + id[1]);
+                        + str[0]
+                        + str[1]
+                        + str[2]);
                 result = sb.toString();
                 break;
             }
@@ -219,6 +233,7 @@ public class MqttMessageHandler {
         this.publish = result;
     }
 
+    //Decode the received Mqtt Message to check command
     private void decode(String msg) {
         if (!msg.isEmpty() && msg.length() >= 30) {
             String data = msg.substring(0, 6);
@@ -272,6 +287,9 @@ public class MqttMessageHandler {
                 this.mqttCommand = null;
         }
     }
+
+    //------All functions below are for handling received Mqtt Messages------
+    //      Convert the message strings to desired data.
     public int isLoginAuthenticated() {
         if (this.mqttCommand == MqttCommand.ACK_AUTHENTICATION) {
             String data = received.substring(30);

@@ -11,6 +11,11 @@ import java.util.Date;
 
 /**
  * Created by Xeosz on 28-Oct-17.
+ *
+ * For future implementation,
+ * This Database act as buffer for received MQTT Messages
+ * MQTT Messages is stored here when App is killed
+ * while the MQTTService and MessageService are running on the phone
  */
 
 public class MqttMessageBuffer extends SQLiteOpenHelper {

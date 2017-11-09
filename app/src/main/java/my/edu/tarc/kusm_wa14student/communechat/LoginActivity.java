@@ -165,6 +165,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void resetConnection() {
+        //Shutdown the MQTT service to be turn on later.
         this.stopService(new Intent(this, MessageService.class));
     }
 
@@ -194,6 +195,9 @@ public class LoginActivity extends AppCompatActivity {
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
                     WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             handler.encode(MqttMessageHandler.MqttCommand.REQ_AUTHENTICATION, new String[]{username, password});
+
+            //Random ClientID and Topic generated before log in.
+            //Subscribed to random topic to listen to server.
             MqttHelper.subscribe(uniqueTopic);
             MqttHelper.publish(uniqueTopic, handler.getPublish());
         }
@@ -211,9 +215,12 @@ public class LoginActivity extends AppCompatActivity {
                             if (handler.mqttCommand == MqttMessageHandler.MqttCommand.ACK_AUTHENTICATION) {
                                 if (handler.isLoginAuthenticated() == 3) {
                                     user = handler.getUserData();
-                                    Log.i("login", user.getNickname());
+                                    Log.i("[Login]", user.getNickname());
                                 }
                                 result = handler.isLoginAuthenticated();
+
+                                //Unsubscribe the unique topic used to do the login authentication.
+                                //since the user has log on, the client ID and Topic will be discarded.
                                 MqttHelper.unsubscribe(uniqueTopic);
                             }
                         } else {

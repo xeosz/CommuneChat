@@ -20,5 +20,24 @@
         <item name="android:textSize">22sp</item>
     </style>
 
+    <style name="AlertDialogStyle" parent="Base.Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:fontFamily">sans-serif</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Caption</item>
+        <item name="buttonBarNegativeButtonStyle">@style/AlertDialogNegativeButton</item>
+        <item name="buttonBarPositiveButtonStyle">@style/AlertDialogPositiveButton</item>
+    </style>
+
+    <style name="AlertDialogPositiveButton">
+        <item name="android:textStyle">bold</item>
+        <item name="android:background">@color/colorCombination5</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+
+    <style name="AlertDialogNegativeButton">
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/colorCombination5</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
 
 </resources>
