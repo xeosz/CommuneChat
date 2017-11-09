@@ -44,11 +44,12 @@ public class SearchCategoryFragment extends Fragment {
     private static final int SEARCH_SESSION = 3;
     private static final int SEARCH_COURSES = 4;
     private static final int SEARCH_GROUP = 5;
+    private static final int SEARCH_CATEGORY_RESULT = 6;
     private static final long TASK_TIMEOUT = 6000;
     private static final String TITLE_KEY = "TITLE";
     private static final String TYPE_KEY = "TYPE";
     private static final String DATA_KEY = "DATA";
-    private static final int SEARCH_SIZE = 5;
+    private static final int SEARCH_CATEGORY_SIZE = 5;
 
     //Views
     private TextView tvTitle, tvMessage, tvSelect;
@@ -83,7 +84,7 @@ public class SearchCategoryFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_search_category, container, false);
 
         resultList = new ArrayList<>();
-        strings = new String[SEARCH_SIZE];
+        strings = new String[SEARCH_CATEGORY_SIZE];
 
         //Get passed arguments
         if (!getArguments().isEmpty()) {
@@ -110,6 +111,7 @@ public class SearchCategoryFragment extends Fragment {
         onClickAnimation.setDuration(1000);
 
         tvTitle.setText(title);
+        tvTitle.setSelected(true);
         runLoadingTask(type, strings);
 
         ibBack.setOnClickListener(new View.OnClickListener() {
@@ -124,10 +126,9 @@ public class SearchCategoryFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 view.startAnimation(onClickAnimation);
-                if (type != SEARCH_GROUP) {
-                    String tempTitle = (String) lvResult.getItemAtPosition(i);
-                    proceed((String) lvResult.getItemAtPosition(i), type);
-                }
+
+                String tempTitle = (String) lvResult.getItemAtPosition(i);
+                proceed((String) lvResult.getItemAtPosition(i), type);
             }
         });
 
@@ -230,8 +231,26 @@ public class SearchCategoryFragment extends Fragment {
             }
             case SEARCH_GROUP: {
                 strings[4] = title;
-                args.putInt(TYPE_KEY, SEARCH_GROUP);
-                break;
+                args.putInt(TYPE_KEY, SEARCH_CATEGORY_RESULT);
+
+                for (String s : strings) {
+                    if (s != null)
+                        this.title += "/" + s;
+                }
+
+                args.putString(TITLE_KEY, this.title);
+                args.putStringArray(DATA_KEY, strings);
+
+                Fragment fragment = new SearchResultFragment();
+                fragment.setArguments(args);
+
+                FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
+                ft.setCustomAnimations(R.anim.slide_from_right_to_mid, R.anim.slide_right, R.anim.slide_from_right_to_mid, R.anim.slide_right);
+                ft.add(R.id.main_frame, fragment)
+                        .addToBackStack("search_result_fragment")
+                        .commit();
+
+                return; //stop further code in this method.
             }
         }
         for (String s : strings) {
@@ -245,7 +264,7 @@ public class SearchCategoryFragment extends Fragment {
         fragment.setArguments(args);
 
         FragmentTransaction ft = getActivity().getSupportFragmentManager().beginTransaction();
-        ft.setCustomAnimations(R.anim.slide_left, R.anim.slide_right, R.anim.slide_left, R.anim.slide_right);
+        ft.setCustomAnimations(R.anim.slide_from_right_to_mid, R.anim.slide_right, R.anim.slide_from_right_to_mid, R.anim.slide_right);
         ft.add(R.id.main_frame, fragment)
                 .addToBackStack("search_result_fragment")
                 .commit();
@@ -378,7 +397,11 @@ public class SearchCategoryFragment extends Fragment {
                 viewHolder = (ViewHolder) convertView.getTag();
             }
 
+            if (type == SEARCH_GROUP) {
+                viewHolder.tvTitle.setText("Group " + Integer.parseInt(data));
+            } else {
             viewHolder.tvTitle.setText(data);
+            }
 
             return convertView;
         }

@@ -199,6 +199,7 @@ public class MqttMessageHandler {
                         + strings[2]
                         + strings[3]
                         + strings[4]);
+                result = sb.toString();
                 break;
             }
             case KEEP_ALIVE: {
@@ -651,8 +652,7 @@ public class MqttMessageHandler {
 
     public ArrayList<Contact> getStudents() {
         ArrayList<Contact> result = new ArrayList<Contact>();
-
-        if (this.mqttCommand == MqttCommand.ACK_SEARCH_CATEGORY_GROUP) {
+        if (this.mqttCommand == MqttCommand.ACK_SEARCH_CATEGORY_MEMBER) {
             received = received.substring(30);
             String data = received;
             int temp;
@@ -660,7 +660,7 @@ public class MqttMessageHandler {
                 Contact contact = new Contact();
 
                 contact.setUid(Integer.parseInt(data.substring(0, 10)));
-                data.substring(10);
+                data = data.substring(10);
 
                 temp = Integer.parseInt(data.substring(0, 3));
                 data = data.substring(3);

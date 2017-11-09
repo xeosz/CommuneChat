@@ -212,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
         Fragment fragment = getSupportFragmentManager().findFragmentByTag("search_result_fragment");
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         if (fragment != null && fragment instanceof SearchResultFragment) {
-            ft.setCustomAnimations(R.anim.slide_up, R.anim.slide_left, R.anim.slide_up, R.anim.slide_left);
+            ft.setCustomAnimations(R.anim.slide_up, R.anim.slide_from_mid_to_left, R.anim.slide_up, R.anim.slide_from_mid_to_left);
             ft.remove(fragment).commit();
         } else {
             super.onBackPressed();

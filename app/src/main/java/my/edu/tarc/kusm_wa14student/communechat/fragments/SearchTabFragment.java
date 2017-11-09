@@ -24,6 +24,9 @@ public class SearchTabFragment extends Fragment {
     private static final int SEARCH_CATEGORY = 1;
     private static final int SEARCH_NEARBY = 3;
     private static final int SEARCH_REC = 4;
+    private static final String TITLE_KEY = "TITLE";
+    private static final String TYPE_KEY = "TYPE";
+    private static final String DATA_KEY = "DATA";
     //Views
     private EditText etSearch;
     private Button btnCategory, btnRecommend, btnNearby, btnChat, btnFriendRequest;
@@ -65,14 +68,14 @@ public class SearchTabFragment extends Fragment {
 
                     //Pass data into fragment
                     Bundle args = new Bundle();
-                    args.putString("SEARCH_STRING", etSearch.getText().toString());
-                    args.putInt("TYPE", SEARCH_BY_NAME);
+                    args.putString(DATA_KEY, etSearch.getText().toString());
+                    args.putInt(TYPE_KEY, SEARCH_BY_NAME);
 
                     Fragment fragment = new SearchResultFragment();
                     fragment.setArguments(args);
 
                     FragmentTransaction ft = getFragmentManager().beginTransaction();
-                    ft.setCustomAnimations(R.anim.slide_up, R.anim.down_from_top, R.anim.slide_up, R.anim.slide_left);
+                    ft.setCustomAnimations(R.anim.slide_up, R.anim.down_from_top, R.anim.slide_up, R.anim.slide_from_mid_to_left);
                     ft.add(R.id.main_frame, fragment)
                             .addToBackStack("search_result_fragment")
                             .commit();
@@ -90,14 +93,14 @@ public class SearchTabFragment extends Fragment {
                 view.startAnimation(onClickAnimation);
 
                 Bundle args = new Bundle();
-                args.putString("TITLE", "Search By Category");
-                args.putInt("TYPE", SEARCH_CATEGORY);
+                args.putString(TITLE_KEY, "Search By Category");
+                args.putInt(TYPE_KEY, SEARCH_CATEGORY);
 
                 Fragment fragment = new SearchCategoryFragment();
                 fragment.setArguments(args);
 
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ft.setCustomAnimations(R.anim.slide_up, R.anim.down_from_top, R.anim.slide_up, R.anim.slide_left);
+                ft.setCustomAnimations(R.anim.slide_up, R.anim.down_from_top, R.anim.slide_up, R.anim.slide_from_mid_to_left);
                 ft.add(R.id.main_frame, fragment)
                         .addToBackStack("search_result_fragment")
                         .commit();
@@ -113,7 +116,7 @@ public class SearchTabFragment extends Fragment {
                 Fragment fragment = new FriendRequestFragment();
 
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ft.setCustomAnimations(R.anim.slide_up, R.anim.down_from_top, R.anim.slide_up, R.anim.slide_left);
+                ft.setCustomAnimations(R.anim.slide_up, R.anim.down_from_top, R.anim.slide_up, R.anim.slide_from_mid_to_left);
                 ft.add(R.id.main_frame, fragment)
                         .addToBackStack("search_result_fragment")
                         .commit();
@@ -127,14 +130,14 @@ public class SearchTabFragment extends Fragment {
                 view.startAnimation(onClickAnimation);
 
                 Bundle args = new Bundle();
-                args.putString("TITLE", "Nearby Friends");
-                args.putInt("TYPE", SEARCH_NEARBY);
+                args.putString(TITLE_KEY, "Nearby Friends");
+                args.putInt(TYPE_KEY, SEARCH_NEARBY);
 
                 Fragment fragment = new SearchResultFragment();
                 fragment.setArguments(args);
 
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ft.setCustomAnimations(R.anim.slide_up, R.anim.down_from_top, R.anim.slide_up, R.anim.slide_left);
+                ft.setCustomAnimations(R.anim.slide_up, R.anim.down_from_top, R.anim.slide_up, R.anim.slide_from_mid_to_left);
                 ft.add(R.id.main_frame, fragment)
                         .addToBackStack("search_result_fragment")
                         .commit();
@@ -148,14 +151,14 @@ public class SearchTabFragment extends Fragment {
                 view.startAnimation(onClickAnimation);
 
                 Bundle args = new Bundle();
-                args.putString("TITLE", "Suggested Friends");
-                args.putInt("TYPE", SEARCH_REC);
+                args.putString(TITLE_KEY, "Suggested Friends");
+                args.putInt(TYPE_KEY, SEARCH_REC);
 
                 Fragment fragment = new SearchResultFragment();
                 fragment.setArguments(args);
 
                 FragmentTransaction ft = getFragmentManager().beginTransaction();
-                ft.setCustomAnimations(R.anim.slide_up, R.anim.down_from_top, R.anim.slide_up, R.anim.slide_left);
+                ft.setCustomAnimations(R.anim.slide_up, R.anim.down_from_top, R.anim.slide_up, R.anim.slide_from_mid_to_left);
                 ft.add(R.id.main_frame, fragment)
                         .addToBackStack("search_result_fragment")
                         .commit();
