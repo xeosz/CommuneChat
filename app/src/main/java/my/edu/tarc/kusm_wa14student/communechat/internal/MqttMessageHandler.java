@@ -42,6 +42,8 @@ public class MqttMessageHandler {
     private static String ACK_SEARCH_CATEGORY_COURSES = "003833";
     private static String REQ_SEARCH_CATEGORY_GROUP = "003834";
     private static String ACK_SEARCH_CATEGORY_GROUP = "003835";
+    private static String REQ_SEARCH_CATEGORY_MEMBER = "003836";
+    private static String ACK_SEARCH_CATEGORY_MEMBER = "003837";
     private static String KEEP_ALIVE = "003999";
 
     public MqttCommand mqttCommand;
@@ -151,27 +153,52 @@ public class MqttMessageHandler {
                 break;
             }
             case REQ_SEARCH_CATEGORY_YEAR: {
+                String[] str = (String[]) data;
                 sb.append(REQ_SEARCH_CATEGORY_YEAR
-                        + RESERVED_STRING);
+                        + RESERVED_STRING
+                        + str[0]);
                 result = sb.toString();
                 break;
             }
             case REQ_SEARCH_CATEGORY_SESSION: {
+                String[] strings = (String[]) data;
                 sb.append(REQ_SEARCH_CATEGORY_SESSION
-                        + RESERVED_STRING);
+                        + RESERVED_STRING
+                        + strings[0]
+                        + strings[1]);
                 result = sb.toString();
                 break;
             }
             case REQ_SEARCH_CATEGORY_COURSES: {
+                String[] strings = (String[]) data;
                 sb.append(REQ_SEARCH_CATEGORY_COURSES
-                        + RESERVED_STRING);
+                        + RESERVED_STRING
+                        + strings[0]
+                        + strings[1]
+                        + strings[2]);
                 result = sb.toString();
                 break;
             }
             case REQ_SEARCH_CATEGORY_GROUP: {
+                String[] strings = (String[]) data;
                 sb.append(REQ_SEARCH_CATEGORY_GROUP
-                        + RESERVED_STRING);
+                        + RESERVED_STRING
+                        + strings[0]
+                        + strings[1]
+                        + strings[2]
+                        + strings[3]);
                 result = sb.toString();
+                break;
+            }
+            case REQ_SEARCH_CATEGORY_MEMBER: {
+                String[] strings = (String[]) data;
+                sb.append(REQ_SEARCH_CATEGORY_MEMBER
+                        + RESERVED_STRING
+                        + strings[0]
+                        + strings[1]
+                        + strings[2]
+                        + strings[3]
+                        + strings[4]);
                 break;
             }
             case KEEP_ALIVE: {
@@ -237,6 +264,9 @@ public class MqttMessageHandler {
             } else if (data.equalsIgnoreCase(ACK_SEARCH_CATEGORY_GROUP)) {
                 this.mqttCommand = MqttCommand.ACK_SEARCH_CATEGORY_GROUP;
 
+            } else if (data.equalsIgnoreCase(ACK_SEARCH_CATEGORY_MEMBER)) {
+                this.mqttCommand = MqttCommand.ACK_SEARCH_CATEGORY_MEMBER;
+
             } else
                 this.mqttCommand = null;
         }
@@ -276,8 +306,8 @@ public class MqttMessageHandler {
             user.setIntake(data.substring(0, 6));
             data = data.substring(6);
 
-            user.setAcademic_year(Integer.parseInt(data.substring(0, 1)));
-            data = data.substring(1);
+            user.setAcademic_year(Integer.parseInt(data.substring(0, 4)));
+            data = data.substring(4);
 
             user.setUid(Integer.parseInt(data.substring(0, 10)));
             data = data.substring(10);
@@ -539,6 +569,109 @@ public class MqttMessageHandler {
         return contacts;
     }
 
+    public ArrayList<String> getFaculties() {
+        ArrayList<String> result = new ArrayList<String>();
+
+        if (this.mqttCommand == MqttCommand.ACK_SEARCH_CATEGORY_FACULTY) {
+            received = received.substring(30);
+            String data = received;
+
+            while (!data.isEmpty()) {
+                result.add(data.substring(0, 4));
+                data = data.substring(4);
+            }
+        }
+
+        return result;
+    }
+
+    public ArrayList<String> getYears() {
+        ArrayList<String> result = new ArrayList<String>();
+
+        if (this.mqttCommand == MqttCommand.ACK_SEARCH_CATEGORY_YEAR) {
+            received = received.substring(30);
+            String data = received;
+
+            while (!data.isEmpty()) {
+                result.add(data.substring(0, 4));
+                data = data.substring(4);
+            }
+        }
+
+        return result;
+    }
+
+    public ArrayList<String> getSessions() {
+        ArrayList<String> result = new ArrayList<String>();
+
+        if (this.mqttCommand == MqttCommand.ACK_SEARCH_CATEGORY_SESSION) {
+            received = received.substring(30);
+            String data = received;
+
+            while (!data.isEmpty()) {
+                result.add(data.substring(0, 6));
+                data = data.substring(6);
+            }
+        }
+
+        return result;
+    }
+
+    public ArrayList<String> getCourses() {
+        ArrayList<String> result = new ArrayList<String>();
+
+        if (this.mqttCommand == MqttCommand.ACK_SEARCH_CATEGORY_COURSES) {
+            received = received.substring(30);
+            String data = received;
+
+            while (!data.isEmpty()) {
+                result.add(data.substring(0, 3));
+                data = data.substring(3);
+            }
+        }
+
+        return result;
+    }
+
+    public ArrayList<String> getGroups() {
+        ArrayList<String> result = new ArrayList<String>();
+
+        if (this.mqttCommand == MqttCommand.ACK_SEARCH_CATEGORY_GROUP) {
+            received = received.substring(30);
+            String data = received;
+
+            while (!data.isEmpty()) {
+                result.add(data.substring(0, 2));
+                data = data.substring(2);
+            }
+        }
+
+        return result;
+    }
+
+    public ArrayList<Contact> getStudents() {
+        ArrayList<Contact> result = new ArrayList<Contact>();
+
+        if (this.mqttCommand == MqttCommand.ACK_SEARCH_CATEGORY_GROUP) {
+            received = received.substring(30);
+            String data = received;
+            int temp;
+            while (!data.isEmpty()) {
+                Contact contact = new Contact();
+
+                contact.setUid(Integer.parseInt(data.substring(0, 10)));
+                data.substring(10);
+
+                temp = Integer.parseInt(data.substring(0, 3));
+                data = data.substring(3);
+                contact.setNickname(data.substring(0, temp));
+                data = data.substring(temp);
+
+                result.add(contact);
+            }
+        }
+        return result;
+    }
 
     protected boolean isReceiving() {
         return (this.mqttCommand == MqttCommand.ACK_AUTHENTICATION ||
@@ -554,7 +687,8 @@ public class MqttMessageHandler {
                 this.mqttCommand == MqttCommand.ACK_SEARCH_CATEGORY_YEAR ||
                 this.mqttCommand == MqttCommand.ACK_SEARCH_CATEGORY_SESSION ||
                 this.mqttCommand == MqttCommand.ACK_SEARCH_CATEGORY_COURSES ||
-                this.mqttCommand == MqttCommand.ACK_SEARCH_CATEGORY_GROUP);
+                this.mqttCommand == MqttCommand.ACK_SEARCH_CATEGORY_GROUP ||
+                this.mqttCommand == MqttCommand.ACK_SEARCH_CATEGORY_MEMBER);
     }
 
     public enum MqttCommand {
@@ -586,6 +720,8 @@ public class MqttMessageHandler {
         ACK_SEARCH_CATEGORY_COURSES,
         REQ_SEARCH_CATEGORY_GROUP,
         ACK_SEARCH_CATEGORY_GROUP,
+        REQ_SEARCH_CATEGORY_MEMBER,
+        ACK_SEARCH_CATEGORY_MEMBER,
         KEEP_ALIVE;
     }
 

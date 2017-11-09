@@ -20,10 +20,10 @@ import my.edu.tarc.kusm_wa14student.communechat.R;
 
 public class SearchTabFragment extends Fragment {
 
-    private static final int SEARCH_BY_NAME = 0;
+    private static final int SEARCH_BY_NAME = 1;
     private static final int SEARCH_CATEGORY = 1;
-    private static final int SEARCH_NEARBY = 2;
-    private static final int SEARCH_REC = 3;
+    private static final int SEARCH_NEARBY = 3;
+    private static final int SEARCH_REC = 4;
     //Views
     private EditText etSearch;
     private Button btnCategory, btnRecommend, btnNearby, btnChat, btnFriendRequest;

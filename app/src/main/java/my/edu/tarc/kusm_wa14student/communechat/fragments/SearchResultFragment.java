@@ -44,9 +44,9 @@ import my.edu.tarc.kusm_wa14student.communechat.model.User;
 
 public class SearchResultFragment extends Fragment {
 
-    private static final int SEARCH_BY_NAME = 0;
-    private static final int SEARCH_NEARBY = 2;
-    private static final int SEARCH_REC = 3;
+    private static final int SEARCH_BY_NAME = 1;
+    private static final int SEARCH_NEARBY = 3;
+    private static final int SEARCH_REC = 4;
 
     private static long TASK_TIMEOUT = 6000;
     //Views

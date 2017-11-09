@@ -20,7 +20,7 @@ public class Contact {
     private float latitude = 0;
     private float longitude = 0;
     private int distance = 0;
-    private int edges;
+    private int edges; //mutual friends count
     private byte[] image;
 
     public Contact() {

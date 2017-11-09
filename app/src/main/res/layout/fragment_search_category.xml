@@ -68,6 +68,18 @@
             </RelativeLayout>
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/textView_search_category_select_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="false"
+            android:padding="@dimen/small_margin"
+            android:paddingStart="@dimen/medium_margin"
+            android:singleLine="true"
+            android:textAlignment="textStart"
+            android:textAllCaps="false"
+            android:textSize="@dimen/small_text" />
+
         <ListView
             android:id="@+id/listView_search_category"
             android:layout_width="match_parent"
@@ -76,12 +88,6 @@
             android:layout_weight="1">
 
         </ListView>
-
-        <Button
-            android:id="@+id/button3"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Button" />
 
     </LinearLayout>
 </RelativeLayout>
