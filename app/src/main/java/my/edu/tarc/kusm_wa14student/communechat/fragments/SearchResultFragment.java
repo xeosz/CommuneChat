@@ -357,6 +357,7 @@ public class SearchResultFragment extends Fragment {
             progressBar.bringToFront();
             tvMessage.setText("");
             tvMessage.setVisibility(View.INVISIBLE);
+
             if (this.type == SEARCH_BY_NAME) {
                 handler.encode(MqttMessageHandler.MqttCommand.REQ_SEARCH_USER, searchString);
                 MqttHelper.publish(MqttHelper.getPublishTopic(), handler.getPublish());

@@ -35,9 +35,9 @@ public final class MqttHelper {
     private static String userTopic;
     private static String clientId;
     private static String topicFormat = "MY/TARUC/CCS/000000001/PUB/USER/";
-    private static String serverUri = "tcp://m11.cloudmqtt.com:17391";
-    private static String mqttUsername = "ehvfrtgx";
-    private static String mqttPassword = "YPcMC08pYYpr";
+    private static String serverUri = "tcp://m14.cloudmqtt.com:16672";
+    private static String mqttUsername = "vwkohpay";
+    private static String mqttPassword = "JPG3F4XUHjRv";
     private static int QoS = 1;
     private static boolean retain = false;
     private static boolean cleanSession = false;
@@ -75,7 +75,16 @@ public final class MqttHelper {
     public static void startMqtt(Context context, String Id) {
         userTopic = getUserTopic(Id);
         clientId = Id;
-        mqttAndroidClient = new MqttAndroidClient(context, serverUri, Id);
+        mqttAndroidClient = new MqttAndroidClient(context, serverUri, clientId);
+
+        if (mqttAndroidClient.isConnected()) {
+            try {
+                mqttAndroidClient.disconnect();
+            } catch (MqttException e) {
+                e.printStackTrace();
+            }
+        }
+
         try {
             IMqttToken token = connect();
             token.setActionCallback(new IMqttActionListener() {
@@ -152,6 +161,7 @@ public final class MqttHelper {
                     }
                 });
             } catch (MqttException e) {
+                Log.w(TAG, "Failed to connect and subscribe.");
                 e.printStackTrace();
             }
         } else {
@@ -160,7 +170,7 @@ public final class MqttHelper {
                 mqttAndroidClient.subscribe(subscriptionTopic, QoS);
                 Log.i(TAG, "[SUBSCRIBED] " + subscriptionTopic);
             } catch (MqttException e) {
-                Log.w(TAG, "Failed to subscribe to topic: " + subscriptionTopic + ".");
+                Log.w(TAG, "Failed to connect and subscribe.");
                 e.printStackTrace();
             }
         }

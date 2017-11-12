@@ -51,7 +51,7 @@ public class MessageService extends Service {
             //Start MQTT Connection
             if (pref.getInt("uid", 0) != 0) {
                 MqttHelper.startMqtt(getApplicationContext(), String.valueOf(pref.getInt("uid", 0)));
-                MqttHelper.subscribe(MqttHelper.getSubscribeTopic());
+                //MqttHelper.subscribe(MqttHelper.getSubscribeTopic());
                 Log.i("[Service] ", "[CLIENT ID]" + pref.getInt("uid", 0) + " [SUBSCRIPTION TOPIC]" + MqttHelper.getSubscribeTopic());
             } else {
                 MqttHelper.startMqtt(getApplicationContext());

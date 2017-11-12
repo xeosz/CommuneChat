@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
         //Start service
         this.startService(new Intent(MainActivity.this, MessageService.class));
+        MqttHelper.subscribe(MqttHelper.getSubscribeTopic());
 
         pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 

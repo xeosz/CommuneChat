@@ -27,7 +27,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Date;
 import java.util.UUID;
 
 import my.edu.tarc.kusm_wa14student.communechat.internal.MessageService;
@@ -46,7 +45,7 @@ public class LoginActivity extends AppCompatActivity {
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
     private User user = new User();
-    private String uniqueTopic = "MY/TARUC/CCS/000000001/PUB/USER/" + UUID.randomUUID().toString() + (new Date().getTime() / 1000);
+    private String uniqueTopic = "MY/TARUC/CCS/000000001/PUB/USER/" + UUID.randomUUID().toString().substring(0, 8);
     private String message = "";
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override

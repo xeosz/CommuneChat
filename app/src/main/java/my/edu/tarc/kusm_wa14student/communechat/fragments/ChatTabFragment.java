@@ -15,24 +15,21 @@ import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
 
 import my.edu.tarc.kusm_wa14student.communechat.R;
-import my.edu.tarc.kusm_wa14student.communechat.internal.MqttHelper;
 
 public class ChatTabFragment extends Fragment {
 
     private ListView chatListView;
-    private EditText editText;
-    private Button btn;
+
     private ArrayList<String> list = new ArrayList<>();
     private CustomAdapter adapter;
     private Bundle bundle = new Bundle();
+
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -62,11 +59,8 @@ public class ChatTabFragment extends Fragment {
 
         //Initialize views
         chatListView = (ListView) rootView.findViewById(R.id.listView_chat);
-        editText = (EditText) rootView.findViewById(R.id.editTextChat);
-        btn = (Button) rootView.findViewById(R.id.button);
 
         list = new ArrayList<String>();
-        list.add("test");
 
         adapter = new CustomAdapter(list, 0, getActivity());
         chatListView.setAdapter(adapter);
@@ -83,16 +77,6 @@ public class ChatTabFragment extends Fragment {
             }
         });
 
-
-        btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                MqttHelper.subscribe("MY/TARUC/000000001/CCS/PUB/CHAT/lol");
-
-            }});
-
-        // Inflate the layout for this fragment
         return rootView;
         }
 
