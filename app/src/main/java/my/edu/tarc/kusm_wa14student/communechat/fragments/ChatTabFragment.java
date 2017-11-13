@@ -30,11 +30,11 @@ public class ChatTabFragment extends Fragment {
     private CustomAdapter adapter;
     private Bundle bundle = new Bundle();
 
+    private String message = "";
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String message = intent.getStringExtra("message");
-            updateList(message);
+            message = intent.getStringExtra("message");
         }
     };
 
@@ -79,11 +79,6 @@ public class ChatTabFragment extends Fragment {
 
         return rootView;
         }
-
-    private void updateList(String msg) {
-        list.add(msg);
-        adapter.notifyDataSetChanged();
-    }
 
     private static class ViewHolder {
         TextView tvName;
