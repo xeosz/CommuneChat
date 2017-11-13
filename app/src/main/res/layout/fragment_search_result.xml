@@ -83,7 +83,8 @@
                             android:layout_height="@dimen/small_icon"
                             android:layout_gravity="center"
                             android:background="@android:color/white"
-                            android:src="@drawable/ic_search" />
+                            android:src="@drawable/ic_search"
+                            android:tint="@android:color/black" />
 
                     </FrameLayout>
 

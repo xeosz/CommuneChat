@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -68,6 +69,7 @@ public class SearchResultFragment extends Fragment {
     private SharedPreferences.Editor editor;
     private ArrayList<Contact> contacts;
     private CustomAdapter adapter;
+    private int type;
 
     private String message = "";
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
@@ -117,7 +119,7 @@ public class SearchResultFragment extends Fragment {
 
         //Retrive bundle
         if (getArguments() != null) {
-            int type = getArguments().getInt(TYPE_KEY);
+            type = getArguments().getInt(TYPE_KEY);
             switch (type) {
                 case SEARCH_BY_NAME: {
                     searchString = getArguments().getString(DATA_KEY);
@@ -231,6 +233,11 @@ public class SearchResultFragment extends Fragment {
 
                 intent.putExtras(bundle);
                 getActivity().startActivity(intent);
+
+                //Clear the nested fragments in Search Category
+                if (type == SEARCH_CATEGORY_RESULT) {
+                    getActivity().getSupportFragmentManager().popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                }
             }
         });
 
