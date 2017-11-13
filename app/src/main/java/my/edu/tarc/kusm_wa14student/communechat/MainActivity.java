@@ -184,7 +184,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateLocation() {
         //Upload current user location & online time to the server.
-        gps = new GPSTracker(MainActivity.this);
         if (gps.canGetLocation()) {
             String latitude = df.format(gps.getLatitude());
             String longitude = df.format(gps.getLongitude());
@@ -207,6 +206,7 @@ public class MainActivity extends AppCompatActivity {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
         } else {
+            gps = new GPSTracker(MainActivity.this);
             keepAliveUpdate();
         }
     }
