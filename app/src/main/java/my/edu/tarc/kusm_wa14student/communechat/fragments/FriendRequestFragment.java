@@ -39,7 +39,8 @@ import my.edu.tarc.kusm_wa14student.communechat.model.Contact;
 import my.edu.tarc.kusm_wa14student.communechat.model.User;
 
 public class FriendRequestFragment extends Fragment {
-
+    //Beware of the static identifier
+    //As it may be used in other fragments
     private static final long TASK_TIMEOUT = 8000;
     private static final int FRIEND_LIST_LOAD = 1;
     private static final int FRIEND_LIST_FRIEND_REQUEST_RESPONSE = 2;

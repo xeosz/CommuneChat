@@ -40,7 +40,7 @@ public class MqttMessageHandler {
     private static String REQ_RESPONSE_FRIEND_REQUEST = "003824";
     private static String ACK_RESPONSE_FRIEND_REQUEST = "003825";
 
-    // Command flow for searching user by category
+    // Progressive command for searching user by category
     // retrieve available records from database
     // 003826 to 003837
     private static String REQ_SEARCH_CATEGORY_FACULTY = "003826";
@@ -690,7 +690,11 @@ public class MqttMessageHandler {
         }
         return result;
     }
+    //--------------------------------------------------------------------------
 
+
+    // If new command is define, please specify all incoming command enum.
+    // This function is used in MessageService, anything please refer to the MessageService.
     protected boolean isReceiving() {
         return (this.mqttCommand == MqttCommand.ACK_AUTHENTICATION ||
                 this.mqttCommand == MqttCommand.ACK_CONTACT_LIST ||
@@ -709,6 +713,7 @@ public class MqttMessageHandler {
                 this.mqttCommand == MqttCommand.ACK_SEARCH_CATEGORY_MEMBER);
     }
 
+    // New command must be defined as ENUM as shown below
     public enum MqttCommand {
         REQ_AUTHENTICATION,
         ACK_AUTHENTICATION,

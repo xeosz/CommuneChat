@@ -17,7 +17,8 @@ import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
 /**
- * Created by Xeosz on 28-Oct-17.
+ * Code referred from online resource
+ * Do not modify as it may be licensed.
  */
 public class GPSTracker extends Service implements LocationListener {
 

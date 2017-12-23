@@ -37,6 +37,7 @@ import my.edu.tarc.kusm_wa14student.communechat.model.User;
 public class LoginActivity extends AppCompatActivity {
 
     private static final long TASK_TIMEOUT = 10000;
+    private static final String TOPIC_PREFIX = "MY/TARUC/CCS/000000001/PUB/USER/";
     //Views
     private EditText etPassword;
     private AutoCompleteTextView etLogin;
@@ -45,7 +46,7 @@ public class LoginActivity extends AppCompatActivity {
     private SharedPreferences pref;
     private SharedPreferences.Editor editor;
     private User user = new User();
-    private String uniqueTopic = "MY/TARUC/CCS/000000001/PUB/USER/" + UUID.randomUUID().toString().substring(0, 8);
+    private String uniqueTopic = TOPIC_PREFIX + UUID.randomUUID().toString().substring(0, 8);
     private String message = "";
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override

@@ -19,9 +19,15 @@ public class ContactDBHandler extends SQLiteOpenHelper {
     // Database Name
     public static final String DATABASE_NAME = "contactsManager";
     // Contacts table name
+    //Main contact list table
     public static final String TABLE_CONTACTS = "contacts";
+
+    //cache storage
     public static final String TABLE_CACHE = "cacheContacts";
+
+    //cache storage
     public static final String TABLE_FRIEND_REQUEST = "friendRequests";
+
     // All Static variables
     // Database Version
     private static final int DATABASE_VERSION = 1;

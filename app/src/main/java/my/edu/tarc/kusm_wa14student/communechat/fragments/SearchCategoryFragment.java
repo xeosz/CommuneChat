@@ -40,6 +40,8 @@ public class SearchCategoryFragment extends Fragment {
 
     //Reusable fragment
     //Search by criteria flow : Faculty > Year > Session/Intake > Courses > Group
+    //Beware of the static identifier
+    //As it may be used in other fragments
     private static final int SEARCH_CATEGORY = 1;
     private static final int SEARCH_YEAR = 2;
     private static final int SEARCH_SESSION = 3;

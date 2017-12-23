@@ -22,6 +22,7 @@ import static org.eclipse.paho.client.mqttv3.MqttConnectOptions.KEEP_ALIVE_INTER
  *
  * ***ATTENTION***
  *  MQTT will only callback to one of the MQTT Android Client with same ClientID
+ *  Which is why static class is applied for whole application context.
  *  Do not create/start multiple MQTT connection / MqttAndroidClient
  */
 
@@ -34,7 +35,7 @@ public final class MqttHelper {
     //Static MQTT Connection Variables
     private static String userTopic;
     private static String clientId;
-    private static String topicFormat = "MY/TARUC/CCS/000000001/PUB/USER/";
+    private static String topicPrefix = "MY/TARUC/CCS/000000001/PUB/USER/";
     private static String serverUri = "tcp://m14.cloudmqtt.com:16672";
     private static String mqttUsername = "vwkohpay";
     private static String mqttPassword = "JPG3F4XUHjRv";
@@ -113,7 +114,7 @@ public final class MqttHelper {
     }
 
     private static String getUserTopic(String uid) {
-        return topicFormat + uid;
+        return topicPrefix + uid;
     }
 
     public static void setCallback(MqttCallbackExtended callback) {

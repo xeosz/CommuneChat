@@ -19,7 +19,8 @@ import android.widget.TextView;
 import my.edu.tarc.kusm_wa14student.communechat.R;
 
 public class SearchTabFragment extends Fragment {
-
+    //Beware of the static identifier
+    //As it may be used in other fragments
     private static final int SEARCH_BY_NAME = 1;
     private static final int SEARCH_CATEGORY = 1;
     private static final int SEARCH_NEARBY = 3;
