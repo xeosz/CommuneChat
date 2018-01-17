@@ -35,11 +35,14 @@ public final class MqttHelper {
     //Static MQTT Connection Variables
     private static String userTopic;
     private static String clientId;
-    private static String topicPrefix = "MY/TARUC/CCS/000000001/PUB/USER/";
-    private static String serverUri = "tcp://m14.cloudmqtt.com:16672";
-    private static String mqttUsername = "vwkohpay";
-    private static String mqttPassword = "JPG3F4XUHjRv";
+
+    //change MQTT broker IP address here
+    private static String serverUri = "tcp://172.16.2.247:1883";
+    private static String mqttUsername = "";
+    private static String mqttPassword = "";
+    
     private static int QoS = 1;
+    private static String topicPrefix = "MY/TARUC/CCS/000000001/PUB/USER/";
     private static boolean retain = false;
     private static boolean cleanSession = false;
     private static boolean automaticReconnect = true;
@@ -132,8 +135,8 @@ public final class MqttHelper {
     private static IMqttToken connect() throws MqttException {
         mqttConnectOptions.setAutomaticReconnect(automaticReconnect);
         mqttConnectOptions.setCleanSession(cleanSession);
-        mqttConnectOptions.setUserName(mqttUsername);
-        mqttConnectOptions.setPassword(mqttPassword.toCharArray());
+        //mqttConnectOptions.setUserName(mqttUsername);
+        //mqttConnectOptions.setPassword(mqttPassword.toCharArray());
         mqttConnectOptions.setKeepAliveInterval(KEEP_ALIVE_INTERVAL_DEFAULT);
         return mqttAndroidClient.connect(mqttConnectOptions);
     }
